@@ -1,13 +1,17 @@
 import { useState } from "react";
+import { create } from "ipfs-http-client";
+import { Buffer } from "buffer";
 import algosdk from "algosdk";
 
-// Configurazione Algorand TestNet
+// Inizializza IPFS client
+const ipfs = create({ url: "https://ipfs.infura.io:5001/api/v0" });
+
+// Inizializza Algorand client
 const algod = new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '');
 
 export default function StoryEditor() {
   const [story, setStory] = useState("");
   const [ipfsHash, setIpfsHash] = useState(null);
-  const [txId, setTxId] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
@@ -15,20 +19,13 @@ export default function StoryEditor() {
     setLoading(true);
 
     try {
-      // 1. Upload su IPFS
-      const response = await fetch("https://ipfs.io/api/v0/add?pin=true", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/octet-stream",
-        },
-        body: new Blob([story], { type: "text/plain" }),
-      });
-
-      const text = await response.text();
-      const hash = text.match(/"Hash":"([^"]+)"/)?.[1];
+      // Caricamento su IPFS
+      const file = Buffer.from(story);
+      const result = await ipfs.add(file);
+      const hash = result.path;
       setIpfsHash(hash);
 
-      // 2. Transazione 0 ALGO con nota IPFS
+      // Salvataggio su Algorand
       const wallet = JSON.parse(localStorage.getItem("anonymous_wallet"));
       const privateKey = algosdk.mnemonicToSecretKey(wallet.mnemonic).sk;
 
@@ -47,11 +44,10 @@ export default function StoryEditor() {
       const { txId } = await algod.sendRawTransaction(signedTxn).do();
       await algod.statusAfterBlock(params.lastRound + 1).do();
 
-      setTxId(txId);
-      console.log("✅ Transazione Algorand inviata con nota IPFS:", txId);
+      console.log("✅ Transazione Algorand inviata:", txId);
     } catch (err) {
-      console.error(err);
-      alert("Errore durante l'invio della storia su IPFS o Algorand.");
+      console.error("❌ Errore:", err);
+      alert("Errore durante il caricamento su IPFS o Algorand.");
     }
 
     setLoading(false);
@@ -76,7 +72,7 @@ export default function StoryEditor() {
 
       {ipfsHash && (
         <div className="mt-4 text-green-400 break-all">
-          ✅ Story uploaded! IPFS Hash:{" "}
+          ✅ Story uploaded! IPFS Hash:  
           <a
             href={`https://ipfs.io/ipfs/${ipfsHash}`}
             target="_blank"
@@ -84,20 +80,6 @@ export default function StoryEditor() {
             className="underline"
           >
             {ipfsHash}
-          </a>
-        </div>
-      )}
-
-      {txId && (
-        <div className="mt-2 text-blue-400 break-all">
-          🔗 TX on Algorand:{" "}
-          <a
-            href={`https://testnet.algoexplorer.io/tx/${txId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            {txId}
           </a>
         </div>
       )}
