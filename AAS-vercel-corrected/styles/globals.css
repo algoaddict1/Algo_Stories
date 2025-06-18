@@ -3,7 +3,18 @@
 @tailwind utilities;
 
 body {
-  background: url('/stars-bg.png') no-repeat center center fixed;
+  @apply bg-black text-white;
+  background-image: url('https://raw.githubusercontent.com/mikewilldev/assets/main/stars-bg.jpg');
   background-size: cover;
-  background-color: black;
+  background-attachment: fixed;
+  font-family: 'Orbitron', sans-serif;
+}
+
+h1, h2, h3 {
+  @apply text-white;
+  text-shadow: 0 0 6px #00fff2, 0 0 12px #7f00ff;
+}
+
+button {
+  @apply transition duration-200;
 }
