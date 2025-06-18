@@ -1,12 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
 
-
 export default function ChooseWallet({ onWalletChosen }) {
   const [selected, setSelected] = useState(null);
   const peraWallet = new PeraWalletConnect();
+
+  useEffect(() => {
+    const anon = localStorage.getItem("anonymous_wallet");
+    const personal = localStorage.getItem("personal_wallet");
+    if (anon) {
+      console.log("✅ Wallet anonimo già presente");
+      setSelected("anonymous");
+      onWalletChosen("anonymous");
+    } else if (personal) {
+      setSelected("personal");
+      onWalletChosen("personal");
+    }
+  }, [onWalletChosen]);
 
   const handleAnonymousWallet = () => {
     const account = algosdk.generateAccount();
@@ -15,6 +27,7 @@ export default function ChooseWallet({ onWalletChosen }) {
       mnemonic: algosdk.secretKeyToMnemonic(account.sk),
     };
     localStorage.setItem("anonymous_wallet", JSON.stringify(anonWallet));
+    console.log("✅ Wallet anonimo generato:", anonWallet);
     setSelected("anonymous");
     onWalletChosen("anonymous");
   };
