@@ -1,26 +1,55 @@
-import { PenLine, BookOpen, DollarSign, User } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { MenuIcon, XIcon } from "@heroicons/react/outline";
 
-export default function Sidebar({ onNavigate }) {
-  const buttons = [
-    { label: "Write a Story", icon: <PenLine size={20} />, color: "from-green-400 to-green-600", key: "write" },
-    { label: "Read Stories", icon: <BookOpen size={20} />, color: "from-blue-400 to-blue-600", key: "read" },
-    { label: "Send Tips", icon: <DollarSign size={20} />, color: "from-purple-400 to-purple-600", key: "tips" },
-    { label: "About", icon: <User size={20} />, color: "from-pink-400 to-pink-600", key: "about" },
-  ];
+const links = [
+  { label: "Home", href: "/" },
+  { label: "Post a Story", href: "/post" },
+  { label: "My Wallet", href: "/wallet" },
+  { label: "About", href: "/about" },
+];
+
+export default function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <aside className="h-screen w-64 fixed top-0 left-0 bg-black border-r border-gray-800 flex flex-col py-8 px-4 space-y-4 z-10">
-      <h1 className="text-2xl text-white font-bold mb-6 text-center">🚀 AAS</h1>
-      {buttons.map((btn) => (
+    <>
+      {/* Mobile menu button */}
+      <div className="md:hidden fixed top-4 left-4 z-50">
         <button
-          key={btn.key}
-          onClick={() => onNavigate(btn.key)}
-          className={`flex items-center gap-3 text-white px-4 py-3 rounded-xl bg-gradient-to-r ${btn.color} hover:scale-105 transition-all duration-200 shadow-lg`}
+          onClick={() => setIsOpen(!isOpen)}
+          className="text-white p-2 bg-gray-900 border border-blue-500 rounded-lg"
         >
-          {btn.icon}
-          <span className="text-sm font-semibold">{btn.label}</span>
+          {isOpen ? <XIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
         </button>
-      ))}
-    </aside>
+      </div>
+
+      {/* Sidebar */}
+      <AnimatePresence>
+        {(isOpen || typeof window === "undefined") && (
+          <motion.nav
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ type: "tween" }}
+            className="fixed top-0 left-0 h-full w-64 bg-black border-r border-blue-500 p-6 space-y-6 z-40 md:relative md:translate-x-0 md:block hidden"
+          >
+            <h1 className="text-2xl font-bold text-green-400 mb-6">💫 AAS</h1>
+            <ul className="space-y-4">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href}>
+                    <span className="block text-white hover:text-blue-400 text-lg font-semibold transition">
+                      {link.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
