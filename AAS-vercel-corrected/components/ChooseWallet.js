@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import algosdk from "algosdk";
-import PeraWalletConnect from "@perawallet/connect";
+const peraWallet = new PeraWalletConnect();
+
 
 export default function ChooseWallet({ onWalletChosen }) {
   const [selected, setSelected] = useState(null);
