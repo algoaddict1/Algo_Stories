@@ -1,7 +1,8 @@
+"use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { MenuIcon, XIcon } from "@heroicons/react/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const links = [
   { label: "Home", href: "/" },
@@ -23,14 +24,14 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile button */}
+      {/* Mobile Menu Button */}
       {isMobile && (
         <div className="fixed top-4 left-4 z-50">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="text-white p-2 bg-gray-900 border border-blue-500 rounded-lg"
           >
-            {isOpen ? <XIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
+            {isOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
           </button>
         </div>
       )}
@@ -49,10 +50,10 @@ export default function Sidebar() {
             <ul className="space-y-4">
               {links.map((link) => (
                 <li key={link.href}>
-                  <Link href={link.href}>
+                  <Link href={link.href} passHref>
                     <span
-                      className="block text-white hover:text-blue-400 text-lg font-semibold transition"
-                      onClick={() => isMobile && setIsOpen(false)} // chiudi menu su mobile
+                      className="block cursor-pointer text-white hover:text-blue-400 text-lg font-semibold transition"
+                      onClick={() => isMobile && setIsOpen(false)}
                     >
                       {link.label}
                     </span>
