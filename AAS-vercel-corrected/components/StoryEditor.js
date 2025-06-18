@@ -1,4 +1,8 @@
 import { useState } from "react";
+import algosdk from "algosdk";
+
+const algod = new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '');
+
 
 export default function StoryEditor() {
   const [story, setStory] = useState("");
@@ -17,6 +21,31 @@ export default function StoryEditor() {
         },
         body: new Blob([story], { type: "text/plain" }),
       });
+      const text = await response.text();
+const hash = text.match(/"Hash":"([^"]+)"/)?.[1];
+setIpfsHash(hash);
+
+// 👇 Codice per inviare transazione Algorand
+const wallet = JSON.parse(localStorage.getItem("anonymous_wallet"));
+const privateKey = algosdk.mnemonicToSecretKey(wallet.mnemonic).sk;
+
+const params = await algod.getTransactionParams().do();
+const note = new TextEncoder().encode(`ipfs://${hash}`);
+
+const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+  from: wallet.address,
+  to: wallet.address,
+  amount: 0,
+  note,
+  suggestedParams: params,
+});
+
+const signedTxn = txn.signTxn(privateKey);
+const { txId } = await algod.sendRawTransaction(signedTxn).do();
+await algod.statusAfterBlock(params.lastRound + 1).do();
+
+console.log("✅ Transazione Algorand inviata con nota IPFS:", txId);
+
 
       const text = await response.text();
       const hash = text.match(/"Hash":"([^"]+)"/)?.[1];
