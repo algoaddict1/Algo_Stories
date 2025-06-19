@@ -20,6 +20,7 @@ export default function Stories() {
   const [likes, setLikes] = useState({});
   const [comments, setComments] = useState({});
   const [tipAmounts, setTipAmounts] = useState({});
+  const [tipTotals, setTipTotals] = useState({});
   const [wallet, setWallet] = useState("MY_WALLET_ADDRESS"); // ⚠️ Sostituire con wallet connesso
 
   const toggleLike = (storyId) => {
@@ -44,13 +45,28 @@ export default function Stories() {
     }));
   };
 
-  const sendTip = (storyWallet, amount) => {
-    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+  const sendTip = (storyId, storyWallet, amount) => {
+    const numericAmount = parseFloat(amount);
+    if (!numericAmount || numericAmount <= 0) {
       alert("⚠️ Please enter a valid amount");
       return;
     }
-    alert(`(Simulazione) Inviare ${amount} ALGO a ${storyWallet}`);
-    // Qui collegheremo Algorand SDK per inviare la tip
+
+    alert(`(Simulazione) Inviare ${numericAmount} ALGO a ${storyWallet}`);
+
+    // Aggiorna il totale tips ricevuti (frontend)
+    setTipTotals((prev) => ({
+      ...prev,
+      [storyId]: (prev[storyId] || 0) + numericAmount,
+    }));
+
+    // Pulisce il campo input
+    setTipAmounts((prev) => ({
+      ...prev,
+      [storyId]: "",
+    }));
+
+    // 🔜 Collegamento reale a SDK o backend va qui
   };
 
   return (
@@ -74,21 +90,26 @@ export default function Stories() {
               ❤️ {likes[story.id] ? 1 : 0}
             </button>
 
-            {/* Tips con importo personalizzato */}
-            <div className="mt-4 flex gap-2 items-center">
-              <input
-                type="number"
-                placeholder="Amount (e.g. 1.5)"
-                value={tipAmounts[story.id] || ""}
-                onChange={(e) => handleTipChange(story.id, e.target.value)}
-                className="bg-gray-800 text-white text-sm p-1 px-2 rounded border border-green-400 w-32"
-              />
-              <button
-                onClick={() => sendTip(story.wallet, tipAmounts[story.id])}
-                className="px-3 py-1 rounded-xl border border-green-400 hover:bg-green-600"
-              >
-                💸 Send Tip
-              </button>
+            {/* Tips con contatore */}
+            <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Amount (e.g. 1.5)"
+                  value={tipAmounts[story.id] || ""}
+                  onChange={(e) => handleTipChange(story.id, e.target.value)}
+                  className="bg-gray-800 text-white text-sm p-1 px-2 rounded border border-green-400 w-32"
+                />
+                <button
+                  onClick={() => sendTip(story.id, story.wallet, tipAmounts[story.id])}
+                  className="px-3 py-1 rounded-xl border border-green-400 hover:bg-green-600"
+                >
+                  💸 Send Tip
+                </button>
+              </div>
+              <div className="text-sm text-green-300 ml-1">
+                Tips Received: {tipTotals[story.id] || 0} ALGO
+              </div>
             </div>
 
             {/* Commenti */}
