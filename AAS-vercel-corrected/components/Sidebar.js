@@ -10,9 +10,10 @@ const links = [
   { label: "Post a Story", href: "/post" },
   { label: "Stories", href: "/stories" },
   { label: "My Wallet", href: "/wallet" },
-  { label: "Token AAS", href: "/token" },
+  { label: "Token", href: "/token" },
   { label: "About", href: "/about" }
 ];
+
 
 
 export default function Sidebar() {
