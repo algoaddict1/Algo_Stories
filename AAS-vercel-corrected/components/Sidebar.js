@@ -7,11 +7,13 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const links = [
   { label: "Home", href: "/" },
+  { label: "Post a Story", href: "/post" },
   { label: "Stories", href: "/stories" },
   { label: "My Wallet", href: "/wallet" },
-  { label: "Token", href: "/token AAS" } 
-  { label: "About", href: "/about" },
+  { label: "Token AAS", href: "/token" },
+  { label: "About", href: "/about" }
 ];
+
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
