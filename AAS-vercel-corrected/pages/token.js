@@ -1,5 +1,5 @@
 import Sidebar from "../components/Sidebar";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
 import tokenomics from '../data/tokenomics.json';
 
@@ -30,26 +30,39 @@ export default function TokenPage() {
           </p>
 
           <div className="grid md:grid-cols-2 gap-6 items-center">
-            {/* Wrapper per rendere il grafico responsive anche su mobile */}
-            <div className="w-full h-64 md:h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={tokenomics}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={100}
-                    dataKey="value"
-                  >
-                    {tokenomics.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+            {/* Wrapper per grafico + legenda separata */}
+            <div className="w-full mb-6">
+              <div className="w-full h-64 md:h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={tokenomics}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={100}
+                      dataKey="value"
+                    >
+                      {tokenomics.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              {/* Legenda esterna personalizzata */}
+              <div className="mt-4 flex flex-wrap justify-center gap-3 text-sm">
+                {tokenomics.map((entry, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <span
+                      className="inline-block w-3 h-3 rounded-sm"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <span>{entry.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2 text-sm text-gray-300">
