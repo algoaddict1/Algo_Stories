@@ -40,18 +40,25 @@ export default function ChallengesPage() {
           {challenges.map((challenge, index) => (
             <div
               key={index}
-              className={`border border-gray-700 rounded-lg p-6 bg-gray-900 shadow-lg transition ${
+              className={`relative border border-gray-700 rounded-lg p-6 bg-gray-900 shadow-lg transition ${
                 challenge.locked
                   ? "blur-sm grayscale opacity-60 cursor-not-allowed hover:shadow-none"
                   : "hover:shadow-emerald-500/30"
               }`}
             >
-              <h2 className="text-2xl font-bold text-cyan-300 mb-2">
+              <h2 className="text-2xl font-bold text-cyan-300 mb-2 flex items-center gap-2">
                 {challenge.title}
+                {challenge.locked && <span className="text-yellow-400">🔒</span>}
               </h2>
               <p className="text-gray-300 mb-2">{challenge.description}</p>
               <p className="text-green-400">{challenge.reward}</p>
               <p className="text-sm text-purple-300 italic">{challenge.deadline}</p>
+
+              {challenge.locked && (
+                <div className="absolute bottom-4 right-4 text-xs text-yellow-400 italic">
+                  Coming soon...
+                </div>
+              )}
             </div>
           ))}
         </div>
