@@ -26,8 +26,7 @@ export default function TokenPage() {
           transition={{ delay: 0.5, duration: 1 }}
         >
           <p className="text-lg mb-6 text-emerald-300">
-            AAS (Algo Addict Stories) è il token ufficiale della piattaforma. Viene utilizzato per inviare tips, incentivare la community e finanziare lo sviluppo decentralizzato del progetto.
-          </p>
+AAS (Algo Addict Stories) is the lifeblood of the platform. It allows users to tip stories anonymously, encourages community participation, and provides the financial foundation to sustain and grow the entire decentralized ecosystem.          </p>
 
           <div className="grid md:grid-cols-2 gap-6 items-center">
             <ResponsiveContainer width="100%" height={300}>
