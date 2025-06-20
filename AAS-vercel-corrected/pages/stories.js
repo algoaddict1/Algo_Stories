@@ -54,20 +54,25 @@ export default function Stories() {
 
     alert(`(Simulazione) Inviare ${numericAmount} ALGO a ${storyWallet}`);
 
-    // Aggiorna il totale tips ricevuti (frontend)
     setTipTotals((prev) => ({
       ...prev,
       [storyId]: (prev[storyId] || 0) + numericAmount,
     }));
 
-    // Pulisce il campo input
     setTipAmounts((prev) => ({
       ...prev,
       [storyId]: "",
     }));
-
-    // 🔜 Collegamento reale a SDK o backend va qui
   };
+
+  // 🔝 Filtro delle Hall of Fame (più like o tip ricevuti)
+  const hallOfFameStories = dummyStories.filter((story) =>
+    likes[story.id] === wallet || (tipTotals[story.id] || 0) > 0
+  );
+
+  const regularStories = dummyStories.filter(
+    (story) => !hallOfFameStories.includes(story)
+  );
 
   return (
     <div className="flex bg-black text-white min-h-screen">
@@ -75,12 +80,31 @@ export default function Stories() {
       <main className="flex-1 p-6 space-y-8">
         <h1 className="text-3xl font-bold text-center text-fuchsia-400">🌌 Anonymous Stories</h1>
 
-        {dummyStories.map((story) => (
+        {/* 🏆 Hall of Fame */}
+        {hallOfFameStories.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-bold text-center text-yellow-400">🏆 Hall of Fame</h2>
+            {hallOfFameStories.map((story) => (
+              <div
+                key={story.id}
+                className="bg-gradient-to-r from-purple-700 to-fuchsia-800 p-4 rounded-xl border border-yellow-400 shadow-lg"
+              >
+                <p className="text-lg font-semibold italic">"{story.content}"</p>
+                <div className="text-sm text-gray-200 mt-1">✍️ {story.wallet} • 🕒 {story.timestamp}</div>
+                <div className="mt-2 text-sm text-green-300">
+                  ❤️ {likes[story.id] ? 1 : 0} Likes • 💸 {tipTotals[story.id] || 0} Tips
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {/* 🔽 Altre storie */}
+        {regularStories.map((story) => (
           <div key={story.id} className="bg-gray-900 p-4 rounded-2xl shadow-md border border-fuchsia-600">
             <p className="text-lg">{story.content}</p>
             <div className="text-sm text-gray-400 mt-2">✍️ {story.wallet} • 🕒 {story.timestamp}</div>
 
-            {/* Like */}
             <button
               onClick={() => toggleLike(story.id)}
               className={`mt-4 px-3 py-1 rounded-xl border ${
@@ -90,7 +114,6 @@ export default function Stories() {
               ❤️ {likes[story.id] ? 1 : 0}
             </button>
 
-            {/* Tips con contatore */}
             <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="flex gap-2">
                 <input
@@ -112,7 +135,6 @@ export default function Stories() {
               </div>
             </div>
 
-            {/* Commenti */}
             <div className="mt-4">
               <h3 className="text-sm font-semibold text-fuchsia-300 mb-1">💬 Comments</h3>
               <ul className="space-y-1 text-sm">
