@@ -11,6 +11,7 @@ const links = [
   { label: "Challenges", href: "/challenges" },
   { label: "My Wallet", href: "/wallet" },
   { label: "Token", href: "/token" },
+  { label: "F.A.Q.", href: "/faq" },
   { label: "About", href: "/about" }
 ];
 
