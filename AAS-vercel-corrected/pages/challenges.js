@@ -8,20 +8,23 @@ export default function ChallengesPage() {
       deadline: "Open until June 30",
       description:
         "Write an anonymous story, true or fictional. Touch hearts, speak truth. The most liked or tipped post wins.",
+      locked: false,
     },
     {
       title: "🧠 Decentralized Wisdom",
       reward: "50 AAS and NFT badge for the top 3",
-      deadline: "Ends on July 5",
+      deadline: "Coming soon",
       description:
-        "Share a powerful life lesson you learned the hard way. Web3 is also about growth and sharing.",
+        "This challenge will be revealed soon. Stay tuned.",
+      locked: true,
     },
     {
       title: "👁️ Secret Story Clues",
       reward: "250 AAS to the first wallet that finds all clues",
-      deadline: "Ongoing",
+      deadline: "Coming soon",
       description:
-        "Hidden clues are scattered across selected stories. Find them all and claim the reward. The hunt is on.",
+        "This challenge is currently hidden. Are you ready to hunt?",
+      locked: true,
     },
   ];
 
@@ -37,7 +40,11 @@ export default function ChallengesPage() {
           {challenges.map((challenge, index) => (
             <div
               key={index}
-              className="border border-gray-700 rounded-lg p-6 bg-gray-900 shadow-lg hover:shadow-emerald-500/30 transition"
+              className={`border border-gray-700 rounded-lg p-6 bg-gray-900 shadow-lg transition ${
+                challenge.locked
+                  ? "blur-sm grayscale opacity-60 cursor-not-allowed hover:shadow-none"
+                  : "hover:shadow-emerald-500/30"
+              }`}
             >
               <h2 className="text-2xl font-bold text-cyan-300 mb-2">
                 {challenge.title}
