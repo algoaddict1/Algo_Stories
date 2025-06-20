@@ -1,0 +1,8 @@
+[
+  { "name": "Liquidity Pool", "value": 10 },
+  { "name": "Founder Reserve", "value": 40 },
+  { "name": "Dev Fund", "value": 25 },
+  { "name": "Marketing", "value": 15 },
+  { "name": "Giveaway / Airdrop", "value": 5 },
+  { "name": "DAO & Community", "value": 5 }
+]
