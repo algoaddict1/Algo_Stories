@@ -1,4 +1,5 @@
 
+import Sidebar from "../components/Sidebar";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
 import tokenomics from '../data/tokenomics.json';
