@@ -1,4 +1,4 @@
- import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
 import tokenomics from '../data/tokenomics.json';
@@ -26,27 +26,31 @@ export default function TokenPage() {
           transition={{ delay: 0.5, duration: 1 }}
         >
           <p className="text-lg mb-6 text-emerald-300">
-AAS (Algo Addict Stories) is the lifeblood of the platform. It allows users to tip stories anonymously, encourages community participation, and provides the financial foundation to sustain and grow the entire decentralized ecosystem.          </p>
+            AAS (Algo Addict Stories) is the lifeblood of the platform. It allows users to tip stories anonymously, encourages community participation, and provides the financial foundation to sustain and grow the entire decentralized ecosystem.
+          </p>
 
           <div className="grid md:grid-cols-2 gap-6 items-center">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={tokenomics}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={100}
-                  dataKey="value"
-                >
-                  {tokenomics.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            {/* Wrapper per rendere il grafico responsive anche su mobile */}
+            <div className="w-full h-64 md:h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={tokenomics}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
+                    dataKey="value"
+                  >
+                    {tokenomics.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
 
             <div className="space-y-2 text-sm text-gray-300">
               <p><strong className="text-purple-400">Token Name:</strong> Algo Addict Stories</p>
