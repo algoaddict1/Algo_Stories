@@ -8,6 +8,7 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 const links = [
   { label: "Home", href: "/" },
   { label: "Stories", href: "/stories" },
+  { label: "Challenges", href: "/challenges" },
   { label: "My Wallet", href: "/wallet" },
   { label: "Token", href: "/token" },
   { label: "About", href: "/about" }
