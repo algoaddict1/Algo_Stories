@@ -18,7 +18,6 @@ export default function Home() {
           <Image src="/logo.png" alt="Logo" width={180} height={180} />
         </div>
 
-        {/* Sezione WRITE */}
         {page === "write" && (
           <div className="flex justify-center">
             <div className="w-full max-w-2xl">
@@ -36,19 +35,22 @@ export default function Home() {
           </div>
         )}
 
-        {/* Sezione READ */}
         {page === "read" && (
-          <h1 className="text-3xl text-center mt-10">📖 Read Stories</h1>
+          <h1 className="text-3xl text-center mt-10 text-purple-400">
+            📖 Read Stories
+          </h1>
         )}
 
-        {/* Sezione TIPS */}
         {page === "tips" && (
-          <h1 className="text-3xl text-center mt-10">💸 Send Tips</h1>
+          <h1 className="text-3xl text-center mt-10 text-green-400">
+            💸 Send Tips
+          </h1>
         )}
 
-        {/* Sezione ABOUT */}
         {page === "about" && (
-          <h1 className="text-3xl text-center mt-10">🧑‍🚀 About</h1>
+          <h1 className="text-3xl text-center mt-10 text-cyan-400">
+            🧑‍🚀 About
+          </h1>
         )}
       </main>
     </div>
