@@ -9,28 +9,22 @@ export default function HomePage() {
       <Sidebar />
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="max-w-3xl text-center space-y-8">
-          {/* LOGO CENTRATO */}
+          {/* LOGO CENTRALE INGRANDITO */}
           <div className="flex justify-center">
             <Image
               src="/logo.png"
               alt="Algo Addict Stories Logo"
-              width={160}
-              height={160}
-              className="rounded-full"
+              width={240}
+              height={240}
               priority
             />
           </div>
 
-          {/* TITOLO */}
-          <h1 className="text-5xl md:text-6xl font-bold text-green-400">
-            Algo Addict Stories
-          </h1>
-
-          {/* DESCRIZIONE */}
+          {/* DESCRIZIONE PULITA */}
           <p className="text-xl text-gray-300 leading-relaxed">
             ✍️ Write your story anonymously on the Algorand blockchain.<br />
             🧠 No identity. No censorship. Just raw truth.<br />
-            💸 Earn tips, gain support, and leave your mark — forever.
+            💸 Earn tips. Gain support. Leave your mark forever.
           </p>
 
           {/* PULSANTE */}
