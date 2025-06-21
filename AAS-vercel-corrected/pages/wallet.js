@@ -1,18 +1,31 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { motion } from "framer-motion";
+import { useWallet } from "../context/WalletContext";
+import ChooseWallet from "../components/ChooseWallet";
 
 export default function WalletPage() {
-  const [walletAddress, setWalletAddress] = useState("ADDR...1234"); // placeholder
-  const [walletType, setWalletType] = useState("Anonymous"); // or "Pera"
+  const {
+    walletAddress,
+    setWalletAddress,
+    walletType,
+    setWalletType,
+  } = useWallet();
+
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
 
-  // Simulazione chiamata backend
+  // Blocca l'accesso se non è connesso nessun wallet
+  if (!walletType || !walletAddress) {
+    return <ChooseWallet onWalletChosen={(type, addr) => {
+      setWalletType(type);
+      setWalletAddress(addr);
+    }} />;
+  }
+
   useEffect(() => {
-    // TODO: chiamata API per sapere se ha già ricevuto AAS
+    // Simulazione chiamata backend
     // setHasClaimedAAS(true or false);
   }, []);
 
