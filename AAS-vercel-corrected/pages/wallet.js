@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { motion } from "framer-motion";
 import { useWallet } from "../context/WalletContext";
@@ -9,30 +9,12 @@ import ChooseWallet from "../components/ChooseWallet";
 export default function WalletPage() {
   const {
     walletAddress,
-    setWalletAddress,
     walletType,
     setWalletType,
+    setWalletAddress,
   } = useWallet();
 
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
-  const [isReady, setIsReady] = useState(false); // 👈 trigger per ricaricare
-
-  // Carica automaticamente se salvato localmente
-  useEffect(() => {
-    const anon = localStorage.getItem("anonymous_wallet");
-    const personal = localStorage.getItem("personal_wallet");
-
-    if (anon && !walletType && !walletAddress) {
-      const parsed = JSON.parse(anon);
-      setWalletType("anonymous");
-      setWalletAddress(parsed.address);
-    } else if (personal && !walletType && !walletAddress) {
-      setWalletType("personal");
-      setWalletAddress(personal);
-    }
-
-    setIsReady(true); // 👈 adesso siamo pronti a mostrare
-  }, []);
 
   const handleClaimAAS = async () => {
     try {
@@ -53,67 +35,67 @@ export default function WalletPage() {
     }
   };
 
+  if (!walletType || !walletAddress) {
+    return (
+      <div className="flex bg-black min-h-screen text-white">
+        <Sidebar />
+        <main className="flex-1 flex items-center justify-center p-6">
+          <ChooseWallet
+            onWalletChosen={(type, addr) => {
+              setWalletType(type);
+              setWalletAddress(addr);
+            }}
+          />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex bg-black min-h-screen text-white">
       <Sidebar />
       <main className="flex-1 p-6 md:p-12 flex items-center justify-center">
-        {!isReady || !walletType || !walletAddress ? (
-          <div className="max-w-md w-full">
-            <ChooseWallet
-              onWalletChosen={(type, addr) => {
-                setWalletType(type);
-                setWalletAddress(addr);
-                setIsReady(true); // 👈 forza aggiornamento
-              }}
-            />
+        <div className="max-w-xl w-full bg-zinc-900 p-6 rounded-2xl border border-cyan-600 shadow-md">
+          <motion.h1
+            className="text-3xl text-center text-cyan-400 mb-8"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            👛 My Wallet
+          </motion.h1>
+
+          <p className="text-lg mb-4">
+            <strong className="text-blue-400">Wallet Address:</strong> {walletAddress}
+          </p>
+          <p className="text-lg mb-6">
+            <strong className="text-blue-400">Wallet Type:</strong> {walletType}
+          </p>
+
+          <div className="mb-6">
+            {hasClaimedAAS ? (
+              <p className="text-green-400 font-semibold">
+                ✅ You have already claimed your AAS tokens.
+              </p>
+            ) : (
+              <button
+                onClick={handleClaimAAS}
+                className="bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded-xl shadow-md"
+              >
+                🎁 Claim Your Free AAS Tokens
+              </button>
+            )}
           </div>
-        ) : (
-          <div className="max-w-xl w-full bg-zinc-900 p-6 rounded-2xl border border-cyan-600 shadow-md">
-            <motion.h1
-              className="text-3xl text-center text-cyan-400 mb-8"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              👛 My Wallet
-            </motion.h1>
 
-            <p className="text-lg mb-4">
-              <strong className="text-blue-400">Wallet Address:</strong>{" "}
-              {walletAddress}
-            </p>
-            <p className="text-lg mb-6">
-              <strong className="text-blue-400">Wallet Type:</strong>{" "}
-              {walletType}
-            </p>
-
-            <div className="mb-6">
-              {hasClaimedAAS ? (
-                <p className="text-green-400 font-semibold">
-                  ✅ You have already claimed your AAS tokens.
-                </p>
-              ) : (
-                <button
-                  onClick={handleClaimAAS}
-                  className="bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded-xl shadow-md"
-                >
-                  🎁 Claim Your Free AAS Tokens
-                </button>
-              )}
-            </div>
-
-            <div className="mt-8">
-              <h2 className="text-xl text-purple-400 mb-2">
-                📜 Your Published Stories
-              </h2>
-              <ul className="text-gray-300 list-disc ml-6 space-y-1">
-                <li>"The Night of the Algorithm" — 2.5 ALGO in tips</li>
-                <li>"Decentralized Dreams" — 0.0 ALGO</li>
-                <li>"AAS Anonymous" — 1.75 ALGO</li>
-              </ul>
-            </div>
+          <div className="mt-8">
+            <h2 className="text-xl text-purple-400 mb-2">📜 Your Published Stories</h2>
+            <ul className="text-gray-300 list-disc ml-6 space-y-1">
+              <li>"The Night of the Algorithm" — 2.5 ALGO in tips</li>
+              <li>"Decentralized Dreams" — 0.0 ALGO</li>
+              <li>"AAS Anonymous" — 1.75 ALGO</li>
+            </ul>
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
