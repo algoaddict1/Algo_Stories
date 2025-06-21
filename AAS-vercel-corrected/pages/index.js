@@ -1,11 +1,12 @@
-import { useState } from "react";
 import Image from "next/image";
 import ChooseWallet from "../components/ChooseWallet";
 import Sidebar from "../components/Sidebar";
 import StoryEditor from "../components/StoryEditor";
+import { useWallet } from "../context/WalletContext";
+import { useState } from "react";
 
 export default function Home() {
-  const [walletType, setWalletType] = useState(null);
+  const { walletType, walletAddress, setWalletType, setWalletAddress } = useWallet();
   const [page, setPage] = useState("write");
 
   return (
@@ -21,12 +22,17 @@ export default function Home() {
         {page === "write" && (
           <div className="flex justify-center">
             <div className="w-full max-w-2xl">
-              {!walletType ? (
+              {!walletType || !walletAddress ? (
                 <div className="text-center space-y-4">
                   <p className="text-gray-400 text-lg">
                     🔐 Connect a wallet to write an anonymous story.
                   </p>
-                  <ChooseWallet onWalletChosen={setWalletType} />
+                  <ChooseWallet
+                    onWalletChosen={(type, addr) => {
+                      setWalletType(type);
+                      setWalletAddress(addr);
+                    }}
+                  />
                 </div>
               ) : (
                 <StoryEditor />
