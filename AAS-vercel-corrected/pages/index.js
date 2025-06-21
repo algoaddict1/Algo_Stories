@@ -1,12 +1,12 @@
+import { useState } from "react";
 import Image from "next/image";
 import ChooseWallet from "../components/ChooseWallet";
 import Sidebar from "../components/Sidebar";
 import StoryEditor from "../components/StoryEditor";
 import { useWallet } from "../context/WalletContext";
-import { useState } from "react";
 
 export default function Home() {
-  const { walletType, walletAddress, setWalletType, setWalletAddress } = useWallet();
+  const { walletType, setWalletType, walletAddress, setWalletAddress } = useWallet();
   const [page, setPage] = useState("write");
 
   return (
@@ -28,9 +28,9 @@ export default function Home() {
                     🔐 Connect a wallet to write an anonymous story.
                   </p>
                   <ChooseWallet
-                    onWalletChosen={(type, addr) => {
+                    onWalletChosen={(type, address) => {
                       setWalletType(type);
-                      setWalletAddress(addr);
+                      setWalletAddress(address);
                     }}
                   />
                 </div>
