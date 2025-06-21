@@ -9,11 +9,11 @@ export default function HomePage() {
       <Sidebar />
       <main className="flex-1 flex items-center justify-center p-6">
         <div className="max-w-3xl text-center space-y-8">
-          {/* LOGO CENTRALE */}
+          {/* LOGO CENTRATO */}
           <div className="flex justify-center">
             <Image
-              src="/logo.png" // Assicurati che il file si chiami così nella cartella /public
-              alt="BLIK Logo"
+              src="/logo.png"
+              alt="Algo Addict Stories Logo"
               width={160}
               height={160}
               className="rounded-full"
@@ -21,15 +21,16 @@ export default function HomePage() {
             />
           </div>
 
-          {/* TITOLO E SLOGAN */}
+          {/* TITOLO */}
           <h1 className="text-5xl md:text-6xl font-bold text-green-400">
             Algo Addict Stories
           </h1>
 
+          {/* DESCRIZIONE */}
           <p className="text-xl text-gray-300 leading-relaxed">
-            ✍️ Share your story anonymously on the Algorand blockchain.<br />
-            🧠 No identity, no censorship, just pure expression.<br />
-            💸 Earn tips, receive feedback, and become immortal — one story at a time.
+            ✍️ Write your story anonymously on the Algorand blockchain.<br />
+            🧠 No identity. No censorship. Just raw truth.<br />
+            💸 Earn tips, gain support, and leave your mark — forever.
           </p>
 
           {/* PULSANTE */}
