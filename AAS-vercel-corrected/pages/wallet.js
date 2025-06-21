@@ -15,10 +15,23 @@ export default function WalletPage() {
   } = useWallet();
 
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
+  const [isReady, setIsReady] = useState(false); // 👈 trigger per ricaricare
 
+  // Carica automaticamente se salvato localmente
   useEffect(() => {
-    // Simulazione chiamata backend
-    // setHasClaimedAAS(true or false);
+    const anon = localStorage.getItem("anonymous_wallet");
+    const personal = localStorage.getItem("personal_wallet");
+
+    if (anon && !walletType && !walletAddress) {
+      const parsed = JSON.parse(anon);
+      setWalletType("anonymous");
+      setWalletAddress(parsed.address);
+    } else if (personal && !walletType && !walletAddress) {
+      setWalletType("personal");
+      setWalletAddress(personal);
+    }
+
+    setIsReady(true); // 👈 adesso siamo pronti a mostrare
   }, []);
 
   const handleClaimAAS = async () => {
@@ -44,12 +57,13 @@ export default function WalletPage() {
     <div className="flex bg-black min-h-screen text-white">
       <Sidebar />
       <main className="flex-1 p-6 md:p-12 flex items-center justify-center">
-        {!walletType || !walletAddress ? (
+        {!isReady || !walletType || !walletAddress ? (
           <div className="max-w-md w-full">
             <ChooseWallet
               onWalletChosen={(type, addr) => {
                 setWalletType(type);
                 setWalletAddress(addr);
+                setIsReady(true); // 👈 forza aggiornamento
               }}
             />
           </div>
