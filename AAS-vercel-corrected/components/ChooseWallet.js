@@ -10,13 +10,16 @@ export default function ChooseWallet({ onWalletChosen }) {
   useEffect(() => {
     const anon = localStorage.getItem("anonymous_wallet");
     const personal = localStorage.getItem("personal_wallet");
+
     if (anon) {
+      const parsed = JSON.parse(anon);
       console.log("✅ Wallet anonimo già presente");
       setSelected("anonymous");
-      onWalletChosen("anonymous");
+      onWalletChosen("anonymous", parsed.address); // ✅ passa anche l'indirizzo
     } else if (personal) {
+      console.log("✅ Wallet personale già presente");
       setSelected("personal");
-      onWalletChosen("personal");
+      onWalletChosen("personal", personal); // ✅ passa indirizzo
     }
   }, [onWalletChosen]);
 
@@ -29,7 +32,7 @@ export default function ChooseWallet({ onWalletChosen }) {
     localStorage.setItem("anonymous_wallet", JSON.stringify(anonWallet));
     console.log("✅ Wallet anonimo generato:", anonWallet);
     setSelected("anonymous");
-    onWalletChosen("anonymous");
+    onWalletChosen("anonymous", anonWallet.address); // ✅ passa anche indirizzo
   };
 
   const handlePersonalWallet = async () => {
@@ -38,7 +41,7 @@ export default function ChooseWallet({ onWalletChosen }) {
       const address = accounts[0];
       localStorage.setItem("personal_wallet", address);
       setSelected("personal");
-      onWalletChosen("personal");
+      onWalletChosen("personal", address); // ✅ passa anche indirizzo
     } catch (error) {
       console.error("Pera Wallet connection failed:", error);
     }
