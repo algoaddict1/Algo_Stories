@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
@@ -7,22 +7,6 @@ export default function ChooseWallet({ onWalletChosen }) {
   const [selected, setSelected] = useState(null);
   const peraWallet = new PeraWalletConnect();
 
-  useEffect(() => {
-    const anon = localStorage.getItem("anonymous_wallet");
-    const personal = localStorage.getItem("personal_wallet");
-
-    if (anon) {
-      const parsed = JSON.parse(anon);
-      console.log("✅ Wallet anonimo già presente");
-      setSelected("anonymous");
-      onWalletChosen("anonymous", parsed.address); // ✅ passa anche l'indirizzo
-    } else if (personal) {
-      console.log("✅ Wallet personale già presente");
-      setSelected("personal");
-      onWalletChosen("personal", personal); // ✅ passa indirizzo
-    }
-  }, [onWalletChosen]);
-
   const handleAnonymousWallet = () => {
     const account = algosdk.generateAccount();
     const anonWallet = {
@@ -30,9 +14,8 @@ export default function ChooseWallet({ onWalletChosen }) {
       mnemonic: algosdk.secretKeyToMnemonic(account.sk),
     };
     localStorage.setItem("anonymous_wallet", JSON.stringify(anonWallet));
-    console.log("✅ Wallet anonimo generato:", anonWallet);
     setSelected("anonymous");
-    onWalletChosen("anonymous", anonWallet.address); // ✅ passa anche indirizzo
+    onWalletChosen("anonymous", anonWallet.address);
   };
 
   const handlePersonalWallet = async () => {
@@ -41,7 +24,7 @@ export default function ChooseWallet({ onWalletChosen }) {
       const address = accounts[0];
       localStorage.setItem("personal_wallet", address);
       setSelected("personal");
-      onWalletChosen("personal", address); // ✅ passa anche indirizzo
+      onWalletChosen("personal", address);
     } catch (error) {
       console.error("Pera Wallet connection failed:", error);
     }
