@@ -4,7 +4,7 @@ export default function ChallengesPage() {
   const challenges = [
     {
       title: "📝 Anon Story Challenge",
-      reward: "100 AAS to the most liked post",
+      reward: "10.000 AAS to the most liked post",
       deadline: "Open until June 30",
       description:
         "Write an anonymous story, true or fictional. Touch hearts, speak truth. The most liked or tipped post wins.",
