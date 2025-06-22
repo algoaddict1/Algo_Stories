@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar";
+import InteractionPopup from "../components/InteractionPopup";
 
 const dummyStories = [
   {
@@ -21,21 +22,58 @@ export default function Stories() {
   const [comments, setComments] = useState({});
   const [tipAmounts, setTipAmounts] = useState({});
   const [tipTotals, setTipTotals] = useState({});
-  const [wallet, setWallet] = useState("MY_WALLET_ADDRESS"); // ⚠️ Sostituire con wallet connesso
+  const [wallet, setWallet] = useState("MY_WALLET_ADDRESS");
 
-  const toggleLike = (storyId) => {
-    setLikes((prev) => ({
-      ...prev,
-      [storyId]: prev[storyId] === wallet ? null : wallet,
-    }));
+  const [showPopup, setShowPopup] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // { type: "like" | "comment", storyId, commentText }
+  const [paidStories, setPaidStories] = useState({}); // storyId: true
+
+  const handlePayConfirm = () => {
+    const { type, storyId, commentText } = pendingAction;
+
+    setPaidStories((prev) => ({ ...prev, [storyId]: true }));
+    setShowPopup(false);
+    setPendingAction(null);
+
+    if (type === "like") {
+      setLikes((prev) => ({
+        ...prev,
+        [storyId]: prev[storyId] === wallet ? null : wallet,
+      }));
+    }
+
+    if (type === "comment" && commentText) {
+      setComments((prev) => ({
+        ...prev,
+        [storyId]: [...(prev[storyId] || []), { text: commentText, from: wallet }],
+      }));
+    }
+  };
+
+  const handleLike = (storyId) => {
+    if (paidStories[storyId]) {
+      setLikes((prev) => ({
+        ...prev,
+        [storyId]: prev[storyId] === wallet ? null : wallet,
+      }));
+    } else {
+      setPendingAction({ type: "like", storyId });
+      setShowPopup(true);
+    }
   };
 
   const handleCommentSubmit = (storyId, commentText) => {
     if (!commentText) return;
-    setComments((prev) => ({
-      ...prev,
-      [storyId]: [...(prev[storyId] || []), { text: commentText, from: wallet }],
-    }));
+
+    if (paidStories[storyId]) {
+      setComments((prev) => ({
+        ...prev,
+        [storyId]: [...(prev[storyId] || []), { text: commentText, from: wallet }],
+      }));
+    } else {
+      setPendingAction({ type: "comment", storyId, commentText });
+      setShowPopup(true);
+    }
   };
 
   const handleTipChange = (storyId, value) => {
@@ -65,7 +103,6 @@ export default function Stories() {
     }));
   };
 
-  // 🔝 Filtro delle Hall of Fame (più like o tip ricevuti)
   const hallOfFameStories = dummyStories.filter((story) =>
     likes[story.id] === wallet || (tipTotals[story.id] || 0) > 0
   );
@@ -80,7 +117,6 @@ export default function Stories() {
       <main className="flex-1 p-6 space-y-8">
         <h1 className="text-3xl font-bold text-center text-fuchsia-400">🌌 Anonymous Stories</h1>
 
-        {/* 🏆 Hall of Fame */}
         {hallOfFameStories.length > 0 && (
           <section className="space-y-4">
             <h2 className="text-2xl font-bold text-center text-yellow-400">🏆 Hall of Fame</h2>
@@ -99,19 +135,16 @@ export default function Stories() {
           </section>
         )}
 
-        {/* 🔽 Altre storie */}
         {regularStories.map((story) => (
           <div key={story.id} className="bg-gray-900 p-4 rounded-2xl shadow-md border border-fuchsia-600">
             <p className="text-lg">{story.content}</p>
             <div className="text-sm text-gray-400 mt-2">✍️ {story.wallet} • 🕒 {story.timestamp}</div>
 
             <button
-              onClick={() => toggleLike(story.id)}
-              className={`mt-4 px-3 py-1 rounded-xl border ${
-                likes[story.id] === wallet ? "bg-fuchsia-600" : "border-fuchsia-600"
-              }`}
+              onClick={() => handleLike(story.id)}
+              className="mt-4 px-3 py-1 rounded-xl border flex items-center gap-2 text-sm hover:bg-fuchsia-700"
             >
-              ❤️ {likes[story.id] ? 1 : 0}
+              ❤️ Like <span className="text-xs bg-fuchsia-700 px-2 py-0.5 rounded-full">500 AAS</span>
             </button>
 
             <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
@@ -162,6 +195,16 @@ export default function Stories() {
             </div>
           </div>
         ))}
+
+        {showPopup && (
+          <InteractionPopup
+            onConfirm={handlePayConfirm}
+            onCancel={() => {
+              setShowPopup(false);
+              setPendingAction(null);
+            }}
+          />
+        )}
       </main>
     </div>
   );
