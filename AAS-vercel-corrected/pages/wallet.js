@@ -1,147 +1,112 @@
-"use client";
 
-import { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
-import { motion } from "framer-motion";
-import { useWallet } from "../context/WalletContext";
-import ChooseWallet from "../components/ChooseWallet";
+import { createContext, useContext, useState, useEffect } from "react";
 
-// ⚠️ Dummy stories, da collegare a backend in futuro
-const dummyStories = [
-  {
-    id: 1,
-    content: "The Night of the Algorithm",
-    tips: 2.5,
-    wallet: "WALLET1",
-  },
-  {
-    id: 2,
-    content: "Decentralized Dreams",
-    tips: 0.0,
-    wallet: "WALLET2",
-  },
-  {
-    id: 3,
-    content: "AAS Anonymous",
-    tips: 1.75,
-    wallet: "WALLET1",
-  },
-];
+const WalletContext = createContext();
 
-export default function WalletPage() {
-  const {
-    walletAddress,
-    walletType,
-    setWalletType,
-    setWalletAddress,
-  } = useWallet();
+export const WalletProvider = ({ children }) => {
+  const [walletType, setWalletType] = useState(null);
+  const [walletAddress, setWalletAddress] = useState(null);
 
-  const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
-
-  // ✅ Controlla su localStorage se è già stato fatto il claim
   useEffect(() => {
-    if (walletAddress) {
-      const claimed = localStorage.getItem(`claimed_${walletAddress}`);
-      if (claimed === "true") setHasClaimedAAS(true);
-    }
-  }, [walletAddress]);
-
-  const handleClaimAAS = async () => {
-    try {
-      const response = await fetch("https://your-backend-url.com/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet: walletAddress })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setHasClaimedAAS(true);
-        localStorage.setItem(`claimed_${walletAddress}`, "true");
-        alert("🎉 AAS tokens successfully claimed!");
-      } else {
-        alert(data.message || "You already claimed your tokens.");
+    const stored = localStorage.getItem("wallet");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.address && parsed.type) {
+          setWalletAddress(parsed.address);
+          setWalletType(parsed.type);
+        }
+      } catch (err) {
+        console.error("Error parsing wallet from localStorage", err);
       }
-    } catch (err) {
-      alert("⚠️ Could not reach backend.");
+    }
+  }, []);
+
+  return (
+    <WalletContext.Provider value={{ walletType, setWalletType, walletAddress, setWalletAddress }}>
+      {children}
+    </WalletContext.Provider>
+  );
+};
+
+export const useWallet = () => useContext(WalletContext);
+
+// components/ChooseWallet.js
+import { useState } from "react";
+import { motion } from "framer-motion";
+import algosdk from "algosdk";
+import { PeraWalletConnect } from "@perawallet/connect";
+
+export default function ChooseWallet({ onWalletChosen }) {
+  const [selected, setSelected] = useState(null);
+  const peraWallet = new PeraWalletConnect();
+
+  const handleAnonymousWallet = () => {
+    const account = algosdk.generateAccount();
+    const anonWallet = {
+      address: account.addr,
+      mnemonic: algosdk.secretKeyToMnemonic(account.sk),
+      type: "anonymous",
+    };
+    localStorage.setItem("wallet", JSON.stringify({ address: anonWallet.address, type: "anonymous" }));
+    setSelected("anonymous");
+    onWalletChosen("anonymous", anonWallet.address);
+  };
+
+  const handlePersonalWallet = async () => {
+    try {
+      const accounts = await peraWallet.connect();
+      const address = accounts[0];
+      localStorage.setItem("wallet", JSON.stringify({ address, type: "personal" }));
+      setSelected("personal");
+      onWalletChosen("personal", address);
+    } catch (error) {
+      console.error("Pera Wallet connection failed:", error);
     }
   };
 
-  // 🧠 Se wallet non è ancora connesso, mostra scelta
-  if (!walletType || !walletAddress) {
-    return (
-      <div className="flex bg-black min-h-screen text-white">
-        <Sidebar />
-        <main className="flex-1 flex items-center justify-center p-6">
-          <ChooseWallet
-            onWalletChosen={(type, addr) => {
-              setWalletType(type);
-              setWalletAddress(addr);
-            }}
-          />
-        </main>
-      </div>
-    );
-  }
-
-  // 🎯 Filtra storie legate al wallet
-  const userStories = dummyStories.filter(
-    (story) => story.wallet === walletAddress
-  );
-
   return (
-    <div className="flex bg-black min-h-screen text-white">
-      <Sidebar />
-      <main className="flex-1 p-6 md:p-12 flex items-center justify-center">
-        <div className="max-w-xl w-full bg-zinc-900 p-6 rounded-2xl border border-cyan-600 shadow-md">
-          <motion.h1
-            className="text-3xl text-center text-cyan-400 mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            👛 My Wallet
-          </motion.h1>
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 space-y-8">
+      <h1 className="text-3xl md:text-5xl font-bold text-center">🛡️ Choose Your Wallet</h1>
+      <p className="text-center text-lg max-w-xl">
+        We respect your privacy. Choose how you want to post your story:
+      </p>
 
-          <p className="text-lg mb-4">
-            <strong className="text-blue-400">Wallet Address:</strong> {walletAddress}
-          </p>
-          <p className="text-lg mb-6">
-            <strong className="text-blue-400">Wallet Type:</strong> {walletType}
-          </p>
+      <div className="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          onClick={handlePersonalWallet}
+          className="bg-gray-900 p-6 rounded-2xl border border-blue-500 cursor-pointer hover:shadow-lg transition"
+        >
+          <h2 className="text-xl font-semibold mb-2">🔓 Connect Your Wallet</h2>
+          <p>Use your existing Algorand wallet (e.g., Pera Wallet) to publish stories and receive tips.</p>
+        </motion.div>
 
-          <div className="mb-6">
-            {hasClaimedAAS ? (
-              <p className="text-green-400 font-semibold">
-                ✅ You have already claimed your AAS tokens.
-              </p>
-            ) : (
-              <button
-                onClick={handleClaimAAS}
-                className="bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded-xl shadow-md"
-              >
-                🎁 Claim Your Free AAS Tokens
-              </button>
-            )}
-          </div>
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          onClick={handleAnonymousWallet}
+          className="bg-gray-900 p-6 rounded-2xl border border-green-500 cursor-pointer hover:shadow-lg transition"
+        >
+          <h2 className="text-xl font-semibold mb-2">🕶️ Use Anonymous Wallet</h2>
+          <p>We will generate a temporary anonymous wallet to keep your identity hidden. No registration needed.</p>
+        </motion.div>
+      </div>
 
-          <div className="mt-8">
-            <h2 className="text-xl text-purple-400 mb-2">📜 Your Published Stories</h2>
-            {userStories.length === 0 ? (
-              <p className="text-gray-400">No stories found for this wallet.</p>
-            ) : (
-              <ul className="text-gray-300 list-disc ml-6 space-y-1">
-                {userStories.map((story) => (
-                  <li key={story.id}>
-                    “{story.content}” — {story.tips} ALGO in tips
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </main>
+      <div className="text-sm text-center max-w-md mt-4 text-gray-400">
+        ✨ <strong>Why anonymous?</strong> Posting anonymously gives you freedom to express without linking your name or wallet identity.
+      </div>
     </div>
+  );
+}
+
+// pages/_app.js
+import '../styles/globals.css';
+import { WalletProvider } from '../context/WalletContext';
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <WalletProvider>
+      <Component {...pageProps} />
+    </WalletProvider>
   );
 }
