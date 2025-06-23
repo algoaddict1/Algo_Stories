@@ -7,17 +7,17 @@ export const WalletProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState(null);
 
   useEffect(() => {
-    const anon = localStorage.getItem("anonymous_wallet");
-    const personal = localStorage.getItem("personal_wallet");
-
-    if (anon) {
-      const parsed = JSON.parse(anon);
-      setWalletType("anonymous");
-      setWalletAddress(parsed.address);
-    } else if (personal) {
-      const parsed = JSON.parse(personal); // 🔧 aggiunto parsing corretto
-      setWalletType("personal");
-      setWalletAddress(parsed.address);     // 🔧 corretto accesso all'indirizzo
+    const stored = localStorage.getItem("wallet");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.address && parsed.type) {
+          setWalletAddress(parsed.address);
+          setWalletType(parsed.type);
+        }
+      } catch (err) {
+        console.error("Error parsing wallet from localStorage", err);
+      }
     }
   }, []);
 
