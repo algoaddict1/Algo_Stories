@@ -14,15 +14,24 @@ export const WalletProvider = ({ children }) => {
         if (parsed.address && parsed.type) {
           setWalletAddress(parsed.address);
           setWalletType(parsed.type);
+        } else {
+          console.warn("🧨 wallet object missing expected fields");
+          localStorage.removeItem("wallet");
         }
       } catch (err) {
-        console.error("Error parsing wallet from localStorage", err);
+        console.error("❌ Invalid wallet data in localStorage:", err);
+        localStorage.removeItem("wallet");
       }
     }
   }, []);
 
   return (
-    <WalletContext.Provider value={{ walletType, setWalletType, walletAddress, setWalletAddress }}>
+    <WalletContext.Provider value={{
+      walletType,
+      setWalletType,
+      walletAddress,
+      setWalletAddress
+    }}>
       {children}
     </WalletContext.Provider>
   );
