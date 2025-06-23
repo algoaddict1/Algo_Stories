@@ -9,6 +9,15 @@ export default function Home() {
   const { walletType, setWalletType, walletAddress, setWalletAddress } = useWallet();
   const [page, setPage] = useState("write");
 
+  const handleWalletChosen = (type, address) => {
+    // Salva in WalletContext
+    setWalletType(type);
+    setWalletAddress(address);
+
+    // Salva anche in localStorage
+    localStorage.setItem("wallet", JSON.stringify({ type, address }));
+  };
+
   return (
     <div className="flex bg-black min-h-screen text-white">
       <Sidebar onNavigate={setPage} />
@@ -27,12 +36,7 @@ export default function Home() {
                   <p className="text-gray-400 text-lg">
                     🔐 Connect a wallet to write an anonymous story.
                   </p>
-                  <ChooseWallet
-                    onWalletChosen={(type, address) => {
-                      setWalletType(type);
-                      setWalletAddress(address);
-                    }}
-                  />
+                  <ChooseWallet onWalletChosen={handleWalletChosen} />
                 </div>
               ) : (
                 <StoryEditor />
