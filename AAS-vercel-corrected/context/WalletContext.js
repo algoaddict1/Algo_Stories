@@ -15,8 +15,9 @@ export const WalletProvider = ({ children }) => {
       setWalletType("anonymous");
       setWalletAddress(parsed.address);
     } else if (personal) {
+      const parsed = JSON.parse(personal); // 🔧 aggiunto parsing corretto
       setWalletType("personal");
-      setWalletAddress(personal);
+      setWalletAddress(parsed.address);     // 🔧 corretto accesso all'indirizzo
     }
   }, []);
 
