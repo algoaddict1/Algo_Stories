@@ -22,7 +22,8 @@ export default function ChooseWallet({ onWalletChosen }) {
     try {
       const accounts = await peraWallet.connect();
       const address = accounts[0];
-      localStorage.setItem("personal_wallet", address);
+      const personalWallet = { address };
+      localStorage.setItem("personal_wallet", JSON.stringify(personalWallet)); // ✅ salva come oggetto
       setSelected("personal");
       onWalletChosen("personal", address);
     } catch (error) {
