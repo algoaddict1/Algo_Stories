@@ -13,7 +13,7 @@ export default function ChooseWallet({ onWalletChosen }) {
       address: account.addr,
       mnemonic: algosdk.secretKeyToMnemonic(account.sk),
     };
-    localStorage.setItem("anonymous_wallet", JSON.stringify(anonWallet));
+    localStorage.setItem("wallet", JSON.stringify({ address: anonWallet.address, type: "anonymous" }));
     setSelected("anonymous");
     onWalletChosen("anonymous", anonWallet.address);
   };
@@ -22,8 +22,7 @@ export default function ChooseWallet({ onWalletChosen }) {
     try {
       const accounts = await peraWallet.connect();
       const address = accounts[0];
-      const personalWallet = { address };
-      localStorage.setItem("personal_wallet", JSON.stringify(personalWallet)); // ✅ salva come oggetto
+      localStorage.setItem("wallet", JSON.stringify({ address, type: "personal" }));
       setSelected("personal");
       onWalletChosen("personal", address);
     } catch (error) {
