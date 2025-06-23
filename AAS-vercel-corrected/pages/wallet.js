@@ -1,10 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import { motion } from "framer-motion";
 import { useWallet } from "../context/WalletContext";
 import ChooseWallet from "../components/ChooseWallet";
+
+// ⚠️ Dummy stories, da collegare a backend in futuro
+const dummyStories = [
+  {
+    id: 1,
+    content: "The Night of the Algorithm",
+    tips: 2.5,
+    wallet: "WALLET1",
+  },
+  {
+    id: 2,
+    content: "Decentralized Dreams",
+    tips: 0.0,
+    wallet: "WALLET2",
+  },
+  {
+    id: 3,
+    content: "AAS Anonymous",
+    tips: 1.75,
+    wallet: "WALLET1",
+  },
+];
 
 export default function WalletPage() {
   const {
@@ -16,6 +38,14 @@ export default function WalletPage() {
 
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
 
+  // ✅ Controlla su localStorage se è già stato fatto il claim
+  useEffect(() => {
+    if (walletAddress) {
+      const claimed = localStorage.getItem(`claimed_${walletAddress}`);
+      if (claimed === "true") setHasClaimedAAS(true);
+    }
+  }, [walletAddress]);
+
   const handleClaimAAS = async () => {
     try {
       const response = await fetch("https://your-backend-url.com/claim", {
@@ -23,18 +53,22 @@ export default function WalletPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet: walletAddress })
       });
+
       const data = await response.json();
+
       if (data.success) {
         setHasClaimedAAS(true);
+        localStorage.setItem(`claimed_${walletAddress}`, "true");
         alert("🎉 AAS tokens successfully claimed!");
       } else {
         alert(data.message || "You already claimed your tokens.");
       }
     } catch (err) {
-      alert("Something went wrong.");
+      alert("⚠️ Could not reach backend.");
     }
   };
 
+  // 🧠 Se wallet non è ancora connesso, mostra scelta
   if (!walletType || !walletAddress) {
     return (
       <div className="flex bg-black min-h-screen text-white">
@@ -50,6 +84,11 @@ export default function WalletPage() {
       </div>
     );
   }
+
+  // 🎯 Filtra storie legate al wallet
+  const userStories = dummyStories.filter(
+    (story) => story.wallet === walletAddress
+  );
 
   return (
     <div className="flex bg-black min-h-screen text-white">
@@ -89,11 +128,17 @@ export default function WalletPage() {
 
           <div className="mt-8">
             <h2 className="text-xl text-purple-400 mb-2">📜 Your Published Stories</h2>
-            <ul className="text-gray-300 list-disc ml-6 space-y-1">
-              <li>"The Night of the Algorithm" — 2.5 ALGO in tips</li>
-              <li>"Decentralized Dreams" — 0.0 ALGO</li>
-              <li>"AAS Anonymous" — 1.75 ALGO</li>
-            </ul>
+            {userStories.length === 0 ? (
+              <p className="text-gray-400">No stories found for this wallet.</p>
+            ) : (
+              <ul className="text-gray-300 list-disc ml-6 space-y-1">
+                {userStories.map((story) => (
+                  <li key={story.id}>
+                    “{story.content}” — {story.tips} ALGO in tips
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </main>
