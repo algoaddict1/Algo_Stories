@@ -1,40 +1,13 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
-import { motion } from "framer-motion";
 import { useWallet } from "../context/WalletContext";
+import Sidebar from "../components/Sidebar";
+import { useEffect, useState } from "react";
 import ChooseWallet from "../components/ChooseWallet";
-
-const dummyStories = [
-  { id: 1, content: "The Night of the Algorithm", tips: 2.5, wallet: "WALLET1" },
-  { id: 2, content: "Decentralized Dreams", tips: 0.0, wallet: "WALLET2" },
-  { id: 3, content: "AAS Anonymous", tips: 1.75, wallet: "WALLET1" },
-];
+import { motion } from "framer-motion";
 
 export default function WalletPage() {
-  const {
-    walletAddress,
-    walletType,
-    setWalletType,
-    setWalletAddress,
-  } = useWallet();
-
+  const { walletType, walletAddress, setWalletType, setWalletAddress } = useWallet();
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (walletAddress || walletType) {
-      setLoading(false);
-    }
-  }, [walletAddress, walletType]);
-
-  useEffect(() => {
-    if (walletAddress) {
-      const claimed = localStorage.getItem(`claimed_${walletAddress}`);
-      if (claimed === "true") setHasClaimedAAS(true);
-    }
-  }, [walletAddress]);
 
   const handleClaimAAS = async () => {
     try {
@@ -43,44 +16,28 @@ export default function WalletPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ wallet: walletAddress })
       });
-
       const data = await response.json();
-
       if (data.success) {
         setHasClaimedAAS(true);
-        localStorage.setItem(`claimed_${walletAddress}`, "true");
         alert("🎉 AAS tokens successfully claimed!");
       } else {
         alert(data.message || "You already claimed your tokens.");
       }
     } catch (err) {
-      alert("⚠️ Could not reach backend.");
+      alert("Something went wrong.");
     }
   };
 
-  if (loading) {
-    return <div className="text-white p-10">Loading wallet...</div>;
-  }
-
-  if (!walletType || !walletAddress) {
+  if (walletType === null || walletAddress === null) {
     return (
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center p-6">
-          <ChooseWallet
-            onWalletChosen={(type, addr) => {
-              setWalletType(type);
-              setWalletAddress(addr);
-            }}
-          />
+          <p className="text-gray-400 text-lg">Loading wallet...</p>
         </main>
       </div>
     );
   }
-
-  const userStories = dummyStories.filter(
-    (story) => story.wallet === walletAddress
-  );
 
   return (
     <div className="flex bg-black min-h-screen text-white">
@@ -120,17 +77,11 @@ export default function WalletPage() {
 
           <div className="mt-8">
             <h2 className="text-xl text-purple-400 mb-2">📜 Your Published Stories</h2>
-            {userStories.length === 0 ? (
-              <p className="text-gray-400">No stories found for this wallet.</p>
-            ) : (
-              <ul className="text-gray-300 list-disc ml-6 space-y-1">
-                {userStories.map((story) => (
-                  <li key={story.id}>
-                    “{story.content}” — {story.tips} ALGO in tips
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ul className="text-gray-300 list-disc ml-6 space-y-1">
+              <li>"The Night of the Algorithm" — 2.5 ALGO in tips</li>
+              <li>"Decentralized Dreams" — 0.0 ALGO</li>
+              <li>"AAS Anonymous" — 1.75 ALGO</li>
+            </ul>
           </div>
         </div>
       </main>
