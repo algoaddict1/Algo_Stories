@@ -9,22 +9,26 @@ export default function ChooseWallet({ onWalletChosen }) {
 
   const handleAnonymousWallet = () => {
     const account = algosdk.generateAccount();
-    const anonWallet = {
+    const wallet = {
+      type: "anonymous",
       address: account.addr,
       mnemonic: algosdk.secretKeyToMnemonic(account.sk),
     };
-    localStorage.setItem("wallet", JSON.stringify({ address: anonWallet.address, type: "anonymous" }));
+    localStorage.removeItem("personal_wallet");
+    localStorage.setItem("wallet", JSON.stringify({ type: wallet.type, address: wallet.address }));
     setSelected("anonymous");
-    onWalletChosen("anonymous", anonWallet.address);
+    onWalletChosen(wallet.type, wallet.address);
   };
 
   const handlePersonalWallet = async () => {
     try {
       const accounts = await peraWallet.connect();
       const address = accounts[0];
-      localStorage.setItem("wallet", JSON.stringify({ address, type: "personal" }));
+      const wallet = { type: "personal", address };
+      localStorage.removeItem("anonymous_wallet");
+      localStorage.setItem("wallet", JSON.stringify(wallet));
       setSelected("personal");
-      onWalletChosen("personal", address);
+      onWalletChosen(wallet.type, wallet.address);
     } catch (error) {
       console.error("Pera Wallet connection failed:", error);
     }
