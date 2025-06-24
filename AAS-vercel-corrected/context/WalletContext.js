@@ -11,27 +11,21 @@ export const WalletProvider = ({ children }) => {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (parsed.address && parsed.type) {
-          setWalletAddress(parsed.address);
+        if (parsed && parsed.type && parsed.address) {
           setWalletType(parsed.type);
-        } else {
-          console.warn("🧨 wallet object missing expected fields");
-          localStorage.removeItem("wallet");
+          setWalletAddress(parsed.address);
         }
       } catch (err) {
-        console.error("❌ Invalid wallet data in localStorage:", err);
+        console.error("Invalid wallet in localStorage:", err);
         localStorage.removeItem("wallet");
       }
     }
   }, []);
 
   return (
-    <WalletContext.Provider value={{
-      walletType,
-      setWalletType,
-      walletAddress,
-      setWalletAddress
-    }}>
+    <WalletContext.Provider
+      value={{ walletType, walletAddress, setWalletType, setWalletAddress }}
+    >
       {children}
     </WalletContext.Provider>
   );
