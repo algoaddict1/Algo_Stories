@@ -15,8 +15,7 @@ export const WalletProvider = ({ children }) => {
           setWalletType(parsed.type);
           setWalletAddress(parsed.address);
         }
-      } catch (err) {
-        console.error("Invalid wallet in localStorage:", err);
+      } catch {
         localStorage.removeItem("wallet");
       }
     }
@@ -31,4 +30,4 @@ export const WalletProvider = ({ children }) => {
   );
 };
 
-export const useWallet = () => useContext(WalletContext);
+export const useAASWallet = () => useContext(WalletContext);
