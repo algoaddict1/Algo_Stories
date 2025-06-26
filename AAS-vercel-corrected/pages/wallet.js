@@ -4,18 +4,24 @@ import { useEffect, useState } from "react";
 import { useAASWallet } from "../context/WalletContext";
 import Sidebar from "../components/Sidebar";
 import { motion } from "framer-motion";
+import { useRouter } from "next/router";
 
 export default function WalletPage() {
   const { walletType, walletAddress } = useAASWallet();
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    if (typeof walletType !== "string") {
-      console.warn("walletType is invalid:", walletType);
-    }
-    if (typeof walletAddress !== "string") {
-      console.warn("walletAddress is invalid:", walletAddress);
+    if (
+      typeof walletType !== "string" ||
+      typeof walletAddress !== "string" ||
+      !walletType ||
+      !walletAddress
+    ) {
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
     }
   }, [walletType, walletAddress]);
 
@@ -50,10 +56,16 @@ export default function WalletPage() {
     return (
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
-        <main className="flex-1 flex items-center justify-center p-6">
+        <main className="flex-1 flex flex-col items-center justify-center p-6">
           <p className="text-gray-400 text-lg animate-pulse">
             🔄 Waiting for wallet connection...
           </p>
+          <button
+            onClick={() => router.push("/")}
+            className="mt-6 px-4 py-2 bg-cyan-600 rounded-lg text-white hover:bg-cyan-800"
+          >
+            🔁 Choose Wallet
+          </button>
         </main>
       </div>
     );
