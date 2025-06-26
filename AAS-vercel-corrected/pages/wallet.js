@@ -1,3 +1,4 @@
+
 "use client";
 import { useEffect, useState } from "react";
 import { useAASWallet } from "../context/WalletContext";
@@ -7,9 +8,16 @@ import { motion } from "framer-motion";
 export default function WalletPage() {
   const { walletType, walletAddress } = useAASWallet();
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleClaimAAS = async () => {
+    if (!walletAddress) {
+      alert("Connect your wallet before claiming.");
+      return;
+    }
+
     try {
+      setLoading(true);
       const response = await fetch("https://your-backend-url.com/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -23,7 +31,9 @@ export default function WalletPage() {
         alert(data.message || "You already claimed your tokens.");
       }
     } catch {
-      alert("Something went wrong.");
+      alert("Something went wrong while claiming tokens.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -32,7 +42,9 @@ export default function WalletPage() {
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
         <main className="flex-1 flex items-center justify-center p-6">
-          <p className="text-gray-400 text-lg">Loading wallet...</p>
+          <p className="text-gray-400 text-lg animate-pulse">
+            🔄 Waiting for wallet connection...
+          </p>
         </main>
       </div>
     );
@@ -67,15 +79,17 @@ export default function WalletPage() {
             ) : (
               <button
                 onClick={handleClaimAAS}
-                className="bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded-xl shadow-md"
+                disabled={loading}
+                className="bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded-xl shadow-md disabled:opacity-50"
               >
-                🎁 Claim Your Free AAS Tokens
+                {loading ? "⏳ Claiming..." : "🎁 Claim Your Free AAS Tokens"}
               </button>
             )}
           </div>
 
           <div className="mt-8">
             <h2 className="text-xl text-purple-400 mb-2">📜 Your Published Stories</h2>
+            <p className="text-sm text-gray-400 mb-2">* Dynamic list coming soon.</p>
             <ul className="text-gray-300 list-disc ml-6 space-y-1">
               <li>"The Night of the Algorithm" — 2.5 ALGO in tips</li>
               <li>"Decentralized Dreams" — 0.0 ALGO</li>
