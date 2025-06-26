@@ -2,39 +2,53 @@ import { useState } from "react";
 import { create } from "ipfs-http-client";
 import { Buffer } from "buffer";
 import algosdk from "algosdk";
+import { useAASWallet } from "../context/WalletContext";
 
-// Inizializza IPFS client
+// IPFS client
 const ipfs = create({ url: "https://ipfs.infura.io:5001/api/v0" });
 
-// Inizializza Algorand client
+// Algorand testnet client
 const algod = new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '');
 
 export default function StoryEditor() {
   const [story, setStory] = useState("");
   const [ipfsHash, setIpfsHash] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { walletType, walletAddress } = useAASWallet();
 
   const handleSubmit = async () => {
-    if (!story.trim()) return;
+    if (!story.trim() || !walletAddress) return;
     setLoading(true);
 
     try {
-      // Caricamento su IPFS
+      // Upload to IPFS
       const file = Buffer.from(story);
       const result = await ipfs.add(file);
       const hash = result.path;
       setIpfsHash(hash);
 
-      // Salvataggio su Algorand
-      const wallet = JSON.parse(localStorage.getItem("anonymous_wallet"));
-      const privateKey = algosdk.mnemonicToSecretKey(wallet.mnemonic).sk;
+      // Skip blockchain tx if not anonymous wallet
+      if (walletType !== "anonymous") {
+        setLoading(false);
+        return;
+      }
 
+      const local = localStorage.getItem("wallet");
+      const parsed = JSON.parse(local);
+
+      if (!parsed || !parsed.address || !parsed.mnemonic) {
+        alert("Missing anonymous wallet data.");
+        setLoading(false);
+        return;
+      }
+
+      const privateKey = algosdk.mnemonicToSecretKey(parsed.mnemonic).sk;
       const params = await algod.getTransactionParams().do();
       const note = new TextEncoder().encode(`ipfs://${hash}`);
 
       const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: wallet.address,
-        to: wallet.address,
+        from: parsed.address,
+        to: parsed.address,
         amount: 0,
         note,
         suggestedParams: params,
@@ -44,10 +58,10 @@ export default function StoryEditor() {
       const { txId } = await algod.sendRawTransaction(signedTxn).do();
       await algod.statusAfterBlock(params.lastRound + 1).do();
 
-      console.log("✅ Transazione Algorand inviata:", txId);
+      console.log("✅ Transaction sent:", txId);
     } catch (err) {
-      console.error("❌ Errore:", err);
-      alert("Errore durante il caricamento su IPFS o Algorand.");
+      console.error("❌ Upload error:", err);
+      alert("Failed to upload your story.");
     }
 
     setLoading(false);
@@ -72,7 +86,7 @@ export default function StoryEditor() {
 
       {ipfsHash && (
         <div className="mt-4 text-green-400 break-all">
-          ✅ Story uploaded! IPFS Hash:  
+          ✅ Story uploaded! IPFS Hash:&nbsp;
           <a
             href={`https://ipfs.io/ipfs/${ipfsHash}`}
             target="_blank"
