@@ -1,12 +1,11 @@
 "use client";
-import { useWallet } from "../context/WalletContext";
-import Sidebar from "../components/Sidebar";
 import { useEffect, useState } from "react";
-import ChooseWallet from "../components/ChooseWallet";
+import { useAASWallet } from "../context/WalletContext";
+import Sidebar from "../components/Sidebar";
 import { motion } from "framer-motion";
 
 export default function WalletPage() {
-  const { walletType, walletAddress, setWalletType, setWalletAddress } = useWallet();
+  const { walletType, walletAddress } = useAASWallet();
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
 
   const handleClaimAAS = async () => {
@@ -14,7 +13,7 @@ export default function WalletPage() {
       const response = await fetch("https://your-backend-url.com/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet: walletAddress })
+        body: JSON.stringify({ wallet: walletAddress }),
       });
       const data = await response.json();
       if (data.success) {
@@ -23,12 +22,12 @@ export default function WalletPage() {
       } else {
         alert(data.message || "You already claimed your tokens.");
       }
-    } catch (err) {
+    } catch {
       alert("Something went wrong.");
     }
   };
 
-  if (walletType === null || walletAddress === null) {
+  if (!walletType || !walletAddress) {
     return (
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
