@@ -3,18 +3,15 @@ import Image from "next/image";
 import ChooseWallet from "../components/ChooseWallet";
 import Sidebar from "../components/Sidebar";
 import StoryEditor from "../components/StoryEditor";
-import { useWallet } from "../context/WalletContext";
+import { useAASWallet } from "../context/WalletContext";
 
 export default function Home() {
-  const { walletType, setWalletType, walletAddress, setWalletAddress } = useWallet();
+  const { walletType, walletAddress, setWalletType, setWalletAddress } = useAASWallet();
   const [page, setPage] = useState("write");
 
   const handleWalletChosen = (type, address) => {
-    // Salva in WalletContext
     setWalletType(type);
     setWalletAddress(address);
-
-    // Salva anche in localStorage
     localStorage.setItem("wallet", JSON.stringify({ type, address }));
   };
 
@@ -23,7 +20,6 @@ export default function Home() {
       <Sidebar onNavigate={setPage} />
 
       <main className="flex-1 p-4 md:p-8">
-        {/* Logo in alto */}
         <div className="flex justify-center mb-6">
           <Image src="/logo.png" alt="Logo" width={180} height={180} />
         </div>
