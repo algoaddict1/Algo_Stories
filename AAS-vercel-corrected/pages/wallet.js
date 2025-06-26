@@ -10,8 +10,17 @@ export default function WalletPage() {
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (typeof walletType !== "string") {
+      console.warn("walletType is invalid:", walletType);
+    }
+    if (typeof walletAddress !== "string") {
+      console.warn("walletAddress is invalid:", walletAddress);
+    }
+  }, [walletType, walletAddress]);
+
   const handleClaimAAS = async () => {
-    if (!walletAddress) {
+    if (!walletAddress || typeof walletAddress !== "string") {
       alert("Connect your wallet before claiming.");
       return;
     }
@@ -37,7 +46,7 @@ export default function WalletPage() {
     }
   };
 
-  if (!walletType || !walletAddress) {
+  if (!walletType || !walletAddress || typeof walletType !== "string" || typeof walletAddress !== "string") {
     return (
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
@@ -65,10 +74,12 @@ export default function WalletPage() {
           </motion.h1>
 
           <p className="text-lg mb-4">
-            <strong className="text-blue-400">Wallet Address:</strong> {walletAddress}
+            <strong className="text-blue-400">Wallet Address:</strong>{" "}
+            {typeof walletAddress === "string" ? walletAddress : "Invalid"}
           </p>
           <p className="text-lg mb-6">
-            <strong className="text-blue-400">Wallet Type:</strong> {walletType}
+            <strong className="text-blue-400">Wallet Type:</strong>{" "}
+            {typeof walletType === "string" ? walletType : "Invalid"}
           </p>
 
           <div className="mb-6">
