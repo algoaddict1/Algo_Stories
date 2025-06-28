@@ -2,10 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
+import { useAASWallet } from "../context/WalletContext";
 
-export default function ChooseWallet({ onWalletChosen }) {
+export default function ChooseWallet() {
   const [selected, setSelected] = useState(null);
   const peraWallet = new PeraWalletConnect();
+  const { setWalletType, setWalletAddress } = useAASWallet();
 
   const handleAnonymousWallet = () => {
     const account = algosdk.generateAccount();
@@ -17,7 +19,8 @@ export default function ChooseWallet({ onWalletChosen }) {
     localStorage.removeItem("personal_wallet");
     localStorage.setItem("wallet", JSON.stringify({ type: wallet.type, address: wallet.address }));
     setSelected("anonymous");
-    onWalletChosen(wallet.type, wallet.address);
+    setWalletType(wallet.type);
+    setWalletAddress(wallet.address);
   };
 
   const handlePersonalWallet = async () => {
@@ -28,7 +31,8 @@ export default function ChooseWallet({ onWalletChosen }) {
       localStorage.removeItem("anonymous_wallet");
       localStorage.setItem("wallet", JSON.stringify(wallet));
       setSelected("personal");
-      onWalletChosen(wallet.type, wallet.address);
+      setWalletType(wallet.type);
+      setWalletAddress(wallet.address);
     } catch (error) {
       console.error("Pera Wallet connection failed:", error);
     }
