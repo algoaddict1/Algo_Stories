@@ -1,26 +1,39 @@
 "use client";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useAASWallet } from "../context/WalletContext";
-import Sidebar from "../components/Sidebar";
 import { motion } from "framer-motion";
-import { useRouter } from "next/router";
+
+const Sidebar = dynamic(() => import("../components/Sidebar"), { ssr: false });
+
+let router;
+try {
+  const useRouter = require("next/router").useRouter;
+  router = typeof window !== "undefined" ? useRouter() : null;
+} catch (e) {
+  router = null;
+}
 
 export default function WalletPage() {
-  const { walletType, walletAddress } = useAASWallet();
+  const { walletType, walletAddress } = useAASWallet() || {};
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 800); // aspetta un attimo prima di valutare redirect
+    }, 800);
     return () => clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
-    if (!loading && (!walletType || !walletAddress)) {
-      router.push("/");
+    if (
+      !loading &&
+      (!walletType || !walletAddress || typeof walletType !== "string" || typeof walletAddress !== "string")
+    ) {
+      if (router?.push) {
+        router.push("/");
+      }
     }
   }, [loading, walletType, walletAddress]);
 
@@ -51,7 +64,13 @@ export default function WalletPage() {
     }
   };
 
-  if (loading || !walletType || !walletAddress) {
+  if (
+    loading ||
+    !walletType ||
+    !walletAddress ||
+    typeof walletType !== "string" ||
+    typeof walletAddress !== "string"
+  ) {
     return (
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
@@ -80,11 +99,11 @@ export default function WalletPage() {
 
           <p className="text-lg mb-4">
             <strong className="text-blue-400">Wallet Address:</strong>{" "}
-            {walletAddress}
+            {typeof walletAddress === "string" ? walletAddress : "Invalid address"}
           </p>
           <p className="text-lg mb-6">
             <strong className="text-blue-400">Wallet Type:</strong>{" "}
-            {walletType}
+            {typeof walletType === "string" ? walletType : "Invalid type"}
           </p>
 
           <div className="mb-6">
