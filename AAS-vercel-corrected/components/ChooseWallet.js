@@ -3,13 +3,11 @@ import { motion } from "framer-motion";
 import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { useAASWallet } from "../context/WalletContext";
-import { useRouter } from "next/router";
 
 export default function ChooseWallet() {
   const [selected, setSelected] = useState(null);
   const peraWallet = new PeraWalletConnect();
   const { setWalletType, setWalletAddress } = useAASWallet();
-  const router = useRouter();
 
   const handleAnonymousWallet = () => {
     const account = algosdk.generateAccount();
@@ -19,7 +17,6 @@ export default function ChooseWallet() {
       mnemonic: algosdk.secretKeyToMnemonic(account.sk),
     };
 
-    // ✅ SALVA SOLO .addr COME address (stringa, non oggetto)
     localStorage.removeItem("personal_wallet");
     localStorage.setItem("wallet", JSON.stringify({
       type: wallet.type,
@@ -29,7 +26,9 @@ export default function ChooseWallet() {
     setSelected("anonymous");
     setWalletType(wallet.type);
     setWalletAddress(wallet.address);
-    router.push("/wallet");
+
+    // ✅ Forza il ricaricamento della pagina
+    window.location.href = "/wallet";
   };
 
   const handlePersonalWallet = async () => {
@@ -44,7 +43,9 @@ export default function ChooseWallet() {
       setSelected("personal");
       setWalletType(wallet.type);
       setWalletAddress(wallet.address);
-      router.push("/wallet");
+
+      // ✅ Forza il ricaricamento della pagina
+      window.location.href = "/wallet";
     } catch (error) {
       console.error("Pera Wallet connection failed:", error);
     }
