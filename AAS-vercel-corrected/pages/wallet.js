@@ -4,15 +4,9 @@ import dynamic from "next/dynamic";
 import { useAASWallet } from "../context/WalletContext";
 import { motion } from "framer-motion";
 
+// Import dinamico per evitare errori SSR
 const Sidebar = dynamic(() => import("../components/Sidebar"), { ssr: false });
-
-let router;
-try {
-  const useRouter = require("next/router").useRouter;
-  router = typeof window !== "undefined" ? useRouter() : null;
-} catch (e) {
-  router = null;
-}
+const ChooseWallet = dynamic(() => import("../components/ChooseWallet"), { ssr: false });
 
 export default function WalletPage() {
   const { walletType, walletAddress } = useAASWallet() || {};
@@ -25,17 +19,6 @@ export default function WalletPage() {
     }, 800);
     return () => clearTimeout(timeout);
   }, []);
-
-  useEffect(() => {
-    if (
-      !loading &&
-      (!walletType || !walletAddress || typeof walletType !== "string" || typeof walletAddress !== "string")
-    ) {
-      if (router?.push) {
-        router.push("/");
-      }
-    }
-  }, [loading, walletType, walletAddress]);
 
   const handleClaimAAS = async () => {
     if (!walletAddress || typeof walletAddress !== "string") {
@@ -64,6 +47,7 @@ export default function WalletPage() {
     }
   };
 
+  // ✅ Se il wallet non è ancora stato selezionato, mostra direttamente ChooseWallet
   if (
     loading ||
     !walletType ||
@@ -74,15 +58,14 @@ export default function WalletPage() {
     return (
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
-        <main className="flex-1 flex flex-col items-center justify-center p-6">
-          <p className="text-gray-400 text-lg animate-pulse">
-            🔄 Waiting for wallet connection...
-          </p>
+        <main className="flex-1 p-6 flex items-center justify-center">
+          <ChooseWallet />
         </main>
       </div>
     );
   }
 
+  // ✅ Pagina My Wallet visibile solo se il wallet è valido
   return (
     <div className="flex bg-black min-h-screen text-white">
       <Sidebar />
@@ -99,11 +82,11 @@ export default function WalletPage() {
 
           <p className="text-lg mb-4">
             <strong className="text-blue-400">Wallet Address:</strong>{" "}
-            {typeof walletAddress === "string" ? walletAddress : "Invalid address"}
+            {typeof walletAddress === "string" ? walletAddress : "Invalid"}
           </p>
           <p className="text-lg mb-6">
             <strong className="text-blue-400">Wallet Type:</strong>{" "}
-            {typeof walletType === "string" ? walletType : "Invalid type"}
+            {typeof walletType === "string" ? walletType : "Invalid"}
           </p>
 
           <div className="mb-6">
