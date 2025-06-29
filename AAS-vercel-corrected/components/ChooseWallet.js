@@ -18,8 +18,14 @@ export default function ChooseWallet() {
       address: account.addr,
       mnemonic: algosdk.secretKeyToMnemonic(account.sk),
     };
+
+    // ✅ SALVA SOLO .addr COME address (stringa, non oggetto)
     localStorage.removeItem("personal_wallet");
-    localStorage.setItem("wallet", JSON.stringify({ type: wallet.type, address: wallet.address }));
+    localStorage.setItem("wallet", JSON.stringify({
+      type: wallet.type,
+      address: wallet.address
+    }));
+
     setSelected("anonymous");
     setWalletType(wallet.type);
     setWalletAddress(wallet.address);
@@ -31,8 +37,10 @@ export default function ChooseWallet() {
       const accounts = await peraWallet.connect();
       const address = accounts[0];
       const wallet = { type: "personal", address };
+
       localStorage.removeItem("anonymous_wallet");
       localStorage.setItem("wallet", JSON.stringify(wallet));
+
       setSelected("personal");
       setWalletType(wallet.type);
       setWalletAddress(wallet.address);
