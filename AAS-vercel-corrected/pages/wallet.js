@@ -1,4 +1,3 @@
-
 "use client";
 import { useEffect, useState } from "react";
 import { useAASWallet } from "../context/WalletContext";
@@ -9,21 +8,21 @@ import { useRouter } from "next/router";
 export default function WalletPage() {
   const { walletType, walletAddress } = useAASWallet();
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    if (
-      typeof walletType !== "string" ||
-      typeof walletAddress !== "string" ||
-      !walletType ||
-      !walletAddress
-    ) {
-      setTimeout(() => {
-        router.push("/");
-      }, 1000);
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 800); // aspetta un attimo prima di valutare redirect
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    if (!loading && (!walletType || !walletAddress)) {
+      router.push("/");
     }
-  }, [walletType, walletAddress]);
+  }, [loading, walletType, walletAddress]);
 
   const handleClaimAAS = async () => {
     if (!walletAddress || typeof walletAddress !== "string") {
@@ -52,7 +51,7 @@ export default function WalletPage() {
     }
   };
 
-  if (!walletType || !walletAddress || typeof walletType !== "string" || typeof walletAddress !== "string") {
+  if (loading || !walletType || !walletAddress) {
     return (
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
@@ -60,12 +59,6 @@ export default function WalletPage() {
           <p className="text-gray-400 text-lg animate-pulse">
             🔄 Waiting for wallet connection...
           </p>
-          <button
-            onClick={() => router.push("/")}
-            className="mt-6 px-4 py-2 bg-cyan-600 rounded-lg text-white hover:bg-cyan-800"
-          >
-            🔁 Choose Wallet
-          </button>
         </main>
       </div>
     );
@@ -87,11 +80,11 @@ export default function WalletPage() {
 
           <p className="text-lg mb-4">
             <strong className="text-blue-400">Wallet Address:</strong>{" "}
-            {typeof walletAddress === "string" ? walletAddress : "Invalid"}
+            {walletAddress}
           </p>
           <p className="text-lg mb-6">
             <strong className="text-blue-400">Wallet Type:</strong>{" "}
-            {typeof walletType === "string" ? walletType : "Invalid"}
+            {walletType}
           </p>
 
           <div className="mb-6">
