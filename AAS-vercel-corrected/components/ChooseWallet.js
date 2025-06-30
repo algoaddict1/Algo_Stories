@@ -11,25 +11,20 @@ export default function ChooseWallet({ onWalletChosen }) {
 
   const handleAnonymousWallet = () => {
     const account = algosdk.generateAccount();
-    const wallet = {
-      type: "anonymous",
-      address: account.addr,
-      mnemonic: algosdk.secretKeyToMnemonic(account.sk),
-    };
+    const address = account.addr; // ✅ solo la stringa
+    const type = "anonymous";
 
     localStorage.removeItem("personal_wallet");
-    localStorage.setItem("wallet", JSON.stringify({
-      type: wallet.type,
-      address: wallet.address,
-    }));
+    localStorage.setItem("wallet", JSON.stringify({ type, address }));
 
-    setWalletType(wallet.type);
-    setWalletAddress(wallet.address);
+    setSelected(type);
+    setWalletType(type);
+    setWalletAddress(address);
 
     if (onWalletChosen) {
-      onWalletChosen(wallet.type, wallet.address);
+      onWalletChosen(type, address);
     } else {
-      window.location.reload(); // Nessun redirect, solo reload
+      window.location.reload();
     }
   };
 
@@ -37,18 +32,19 @@ export default function ChooseWallet({ onWalletChosen }) {
     try {
       const accounts = await peraWallet.connect();
       const address = accounts[0];
-      const wallet = { type: "personal", address };
+      const type = "personal";
 
       localStorage.removeItem("anonymous_wallet");
-      localStorage.setItem("wallet", JSON.stringify(wallet));
+      localStorage.setItem("wallet", JSON.stringify({ type, address }));
 
-      setWalletType(wallet.type);
-      setWalletAddress(wallet.address);
+      setSelected(type);
+      setWalletType(type);
+      setWalletAddress(address);
 
       if (onWalletChosen) {
-        onWalletChosen(wallet.type, wallet.address);
+        onWalletChosen(type, address);
       } else {
-        window.location.reload(); // Reload senza redirect
+        window.location.reload();
       }
     } catch (error) {
       console.error("Pera Wallet connection failed:", error);
