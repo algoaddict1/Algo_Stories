@@ -12,23 +12,23 @@ export default function ChooseWallet({ onWalletChosen }) {
   const { setWalletType, setWalletAddress } = useAASWallet();
 
   const handleAnonymousWallet = () => {
-    const account = algosdk.generateAccount();
-    const address = account.addr; // ✅ solo la stringa
-    const type = "anonymous";
+  const account = algosdk.generateAccount();
+  const address = account.addr; // ✅ solo la stringa
+  const type = "anonymous";
 
-    localStorage.removeItem("personal_wallet");
-    localStorage.setItem("wallet", JSON.stringify({ type, address }));
+  localStorage.removeItem("personal_wallet");
+  localStorage.setItem("wallet", JSON.stringify({ type, address }));
 
-    setSelected(type);
-    setWalletType(type);
-    setWalletAddress(address);
+  setSelected(type);
+  setWalletType(type);
+  setWalletAddress(address);
 
-    if (onWalletChosen) {
-      onWalletChosen(type, address);
-    } else {
-      window.location.reload();
-    }
-  };
+  if (onWalletChosen) {
+    onWalletChosen(type, address);
+  } else {
+    window.location.reload();
+  }
+};
 
   const handlePersonalWallet = async () => {
     try {
