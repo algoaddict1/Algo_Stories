@@ -5,6 +5,8 @@ import { PeraWalletConnect } from "@perawallet/connect";
 import { useAASWallet } from "../context/WalletContext";
 
 export default function ChooseWallet({ onWalletChosen }) {
+  console.log("✅ Sto usando il file ChooseWallet giusto");
+
   const [selected, setSelected] = useState(null);
   const peraWallet = new PeraWalletConnect();
   const { setWalletType, setWalletAddress } = useAASWallet();
@@ -83,6 +85,4 @@ export default function ChooseWallet({ onWalletChosen }) {
       </div>
     </div>
   );
-console.log("✅ Sto usando il file ChooseWallet giusto");
-
 }
