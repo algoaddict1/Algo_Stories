@@ -83,4 +83,6 @@ export default function ChooseWallet({ onWalletChosen }) {
       </div>
     </div>
   );
+console.log("✅ Sto usando il file ChooseWallet giusto");
+
 }
