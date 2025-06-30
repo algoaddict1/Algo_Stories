@@ -4,7 +4,7 @@ import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { useAASWallet } from "../context/WalletContext";
 
-export default function ChooseWallet() {
+export default function ChooseWallet({ onWalletChosen }) {
   const [selected, setSelected] = useState(null);
   const peraWallet = new PeraWalletConnect();
   const { setWalletType, setWalletAddress } = useAASWallet();
@@ -20,15 +20,17 @@ export default function ChooseWallet() {
     localStorage.removeItem("personal_wallet");
     localStorage.setItem("wallet", JSON.stringify({
       type: wallet.type,
-      address: wallet.address
+      address: wallet.address,
     }));
 
-    setSelected("anonymous");
     setWalletType(wallet.type);
     setWalletAddress(wallet.address);
 
-    // ✅ Forza il ricaricamento della pagina
-    window.location.href = "/wallet";
+    if (onWalletChosen) {
+      onWalletChosen(wallet.type, wallet.address);
+    } else {
+      window.location.reload(); // Nessun redirect, solo reload
+    }
   };
 
   const handlePersonalWallet = async () => {
@@ -40,12 +42,14 @@ export default function ChooseWallet() {
       localStorage.removeItem("anonymous_wallet");
       localStorage.setItem("wallet", JSON.stringify(wallet));
 
-      setSelected("personal");
       setWalletType(wallet.type);
       setWalletAddress(wallet.address);
 
-      // ✅ Forza il ricaricamento della pagina
-      window.location.href = "/wallet";
+      if (onWalletChosen) {
+        onWalletChosen(wallet.type, wallet.address);
+      } else {
+        window.location.reload(); // Reload senza redirect
+      }
     } catch (error) {
       console.error("Pera Wallet connection failed:", error);
     }
