@@ -10,34 +10,26 @@ export default function ChooseWallet({ onWalletChosen }) {
   const peraWallet = new PeraWalletConnect();
   const { setWalletType, setWalletAddress } = useAASWallet();
 
-  const handleAnonymousWallet = () => {
+const handleAnonymousWallet = () => {
+  try {
     const account = algosdk.generateAccount();
     const type = "anonymous";
     const address = account.addr;
     const mnemonic = algosdk.secretKeyToMnemonic(account.sk);
 
     const walletData = { type, address, mnemonic };
+
+    console.log("✅ Generated Anonymous Wallet:", walletData);
+
     localStorage.setItem("wallet", JSON.stringify(walletData));
     setWalletType(type);
     setWalletAddress(address);
     if (onWalletChosen) onWalletChosen(type, address);
-  };
+  } catch (err) {
+    console.error("❌ Failed to generate anonymous wallet:", err);
+  }
+};
 
-  const handlePersonalWallet = async () => {
-    try {
-      const accounts = await peraWallet.connect();
-      const type = "personal";
-      const address = accounts[0];
-
-      const walletData = { type, address };
-      localStorage.setItem("wallet", JSON.stringify(walletData));
-      setWalletType(type);
-      setWalletAddress(address);
-      if (onWalletChosen) onWalletChosen(type, address);
-    } catch (e) {
-      console.error("❌ Wallet connection failed:", e);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 space-y-8">
