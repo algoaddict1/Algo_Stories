@@ -5,52 +5,36 @@ import { PeraWalletConnect } from "@perawallet/connect";
 import { useAASWallet } from "../context/WalletContext";
 
 export default function ChooseWallet({ onWalletChosen }) {
-  console.log("✅ Sto usando il file ChooseWallet giusto");
-
   const [selected, setSelected] = useState(null);
   const peraWallet = new PeraWalletConnect();
   const { setWalletType, setWalletAddress } = useAASWallet();
 
   const handleAnonymousWallet = () => {
     const account = algosdk.generateAccount();
+    const type = "anonymous";
     const address = account.addr;
     const mnemonic = algosdk.secretKeyToMnemonic(account.sk);
-    const type = "anonymous";
 
-    localStorage.removeItem("personal_wallet");
-    localStorage.setItem("wallet", JSON.stringify({ type, address, mnemonic }));
-
-    setSelected(type);
+    const walletData = { type, address, mnemonic };
+    localStorage.setItem("wallet", JSON.stringify(walletData));
     setWalletType(type);
     setWalletAddress(address);
-
-    if (onWalletChosen) {
-      onWalletChosen(type, address);
-    } else {
-      window.location.reload();
-    }
+    if (onWalletChosen) onWalletChosen(type, address);
   };
 
   const handlePersonalWallet = async () => {
     try {
       const accounts = await peraWallet.connect();
-      const address = accounts[0];
       const type = "personal";
+      const address = accounts[0];
 
-      localStorage.removeItem("anonymous_wallet");
-      localStorage.setItem("wallet", JSON.stringify({ type, address }));
-
-      setSelected(type);
+      const walletData = { type, address };
+      localStorage.setItem("wallet", JSON.stringify(walletData));
       setWalletType(type);
       setWalletAddress(address);
-
-      if (onWalletChosen) {
-        onWalletChosen(type, address);
-      } else {
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error("Pera Wallet connection failed:", error);
+      if (onWalletChosen) onWalletChosen(type, address);
+    } catch (e) {
+      console.error("❌ Wallet connection failed:", e);
     }
   };
 
@@ -60,7 +44,6 @@ export default function ChooseWallet({ onWalletChosen }) {
       <p className="text-center text-lg max-w-xl">
         We respect your privacy. Choose how you want to post your story:
       </p>
-
       <div className="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
         <motion.div
           whileHover={{ scale: 1.05 }}
@@ -68,7 +51,7 @@ export default function ChooseWallet({ onWalletChosen }) {
           className="bg-gray-900 p-6 rounded-2xl border border-blue-500 cursor-pointer hover:shadow-lg transition"
         >
           <h2 className="text-xl font-semibold mb-2">🔓 Connect Your Wallet</h2>
-          <p>Use your existing Algorand wallet (e.g., Pera Wallet) to publish stories and receive tips.</p>
+          <p>Use your existing Algorand wallet (e.g., Pera Wallet).</p>
         </motion.div>
 
         <motion.div
@@ -77,13 +60,89 @@ export default function ChooseWallet({ onWalletChosen }) {
           className="bg-gray-900 p-6 rounded-2xl border border-green-500 cursor-pointer hover:shadow-lg transition"
         >
           <h2 className="text-xl font-semibold mb-2">🕶️ Use Anonymous Wallet</h2>
-          <p>We will generate a temporary anonymous wallet to keep your identity hidden. No registration needed.</p>
+          <p>We will generate a temporary wallet with no link to your identity.</p>
         </motion.div>
       </div>
+    </div>
+  );
+}
 
-      <div className="text-sm text-center max-w-md mt-4 text-gray-400">
-        ✨ <strong>Why anonymous?</strong> Posting anonymously gives you freedom to express without linking your name or wallet identity.
+
+// ✅ pages/post.js (dove c'è StoryEditor)
+import { useState } from "react";
+import Image from "next/image";
+import ChooseWallet from "../components/ChooseWallet";
+import Sidebar from "../components/Sidebar";
+import StoryEditor from "../components/StoryEditor";
+import { useAASWallet } from "../context/WalletContext";
+
+export default function PostPage() {
+  const { walletType, walletAddress, setWalletType, setWalletAddress } = useAASWallet();
+  const [page, setPage] = useState("write");
+
+  const handleWalletChosen = (type, address) => {
+    setWalletType(type);
+    setWalletAddress(address);
+    localStorage.setItem("wallet", JSON.stringify({ type, address }));
+  };
+
+  return (
+    <div className="flex bg-black min-h-screen text-white">
+      <Sidebar onNavigate={setPage} />
+      <main className="flex-1 p-4 md:p-8">
+        <div className="flex justify-center mb-6">
+          <Image src="/logo.png" alt="Logo" width={180} height={180} />
+        </div>
+        {!walletType || !walletAddress ? (
+          <div className="text-center space-y-4">
+            <p className="text-gray-400 text-lg">
+              🔐 Connect a wallet to write an anonymous story.
+            </p>
+            <ChooseWallet onWalletChosen={handleWalletChosen} />
+          </div>
+        ) : (
+          <StoryEditor />
+        )}
+      </main>
+    </div>
+  );
+}
+
+
+// ✅ pages/wallet.js
+"use client";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useAASWallet } from "../context/WalletContext";
+
+const Sidebar = dynamic(() => import("../components/Sidebar"), { ssr: false });
+const ChooseWallet = dynamic(() => import("../components/ChooseWallet"), { ssr: false });
+
+export default function WalletPage() {
+  const { walletType, walletAddress } = useAASWallet();
+  const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
+
+  if (!walletType || !walletAddress) {
+    return (
+      <div className="flex bg-black min-h-screen text-white">
+        <Sidebar />
+        <main className="flex-1 p-6 flex items-center justify-center">
+          <ChooseWallet />
+        </main>
       </div>
+    );
+  }
+
+  return (
+    <div className="flex bg-black min-h-screen text-white">
+      <Sidebar />
+      <main className="flex-1 p-6 md:p-12 flex items-center justify-center">
+        <div className="max-w-xl w-full bg-zinc-900 p-6 rounded-2xl border border-cyan-600">
+          <h1 className="text-3xl text-center text-cyan-400 mb-8">👛 My Wallet</h1>
+          <p className="text-lg mb-4"><strong className="text-blue-400">Wallet Address:</strong> {walletAddress}</p>
+          <p className="text-lg mb-6"><strong className="text-blue-400">Wallet Type:</strong> {walletType}</p>
+        </div>
+      </main>
     </div>
   );
 }
