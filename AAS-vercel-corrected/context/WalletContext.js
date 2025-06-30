@@ -6,12 +6,12 @@ export const WalletProvider = ({ children }) => {
   const [walletType, setWalletType] = useState(null);
   const [walletAddress, setWalletAddress] = useState(null);
 
-  useEffect(() => {
+  const loadWallet = () => {
     const stored = localStorage.getItem("wallet");
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        if (parsed && parsed.type && parsed.address) {
+        if (parsed?.type && parsed?.address) {
           setWalletType(parsed.type);
           setWalletAddress(parsed.address);
         }
@@ -19,6 +19,18 @@ export const WalletProvider = ({ children }) => {
         localStorage.removeItem("wallet");
       }
     }
+  };
+
+  useEffect(() => {
+    loadWallet(); // iniziale
+
+    // 👇 ascolta eventuali cambiamenti esterni
+    const handleStorageChange = () => {
+      loadWallet();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   return (
