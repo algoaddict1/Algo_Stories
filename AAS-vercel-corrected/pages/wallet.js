@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useAASWallet } from "../context/WalletContext";
 import { motion } from "framer-motion";
 
-// Import dinamico per evitare errori SSR
+// Import dinamico
 const Sidebar = dynamic(() => import("../components/Sidebar"), { ssr: false });
 const ChooseWallet = dynamic(() => import("../components/ChooseWallet"), { ssr: false });
 
@@ -47,7 +47,6 @@ export default function WalletPage() {
     }
   };
 
-  // ✅ Se il wallet non è ancora stato selezionato, mostra direttamente ChooseWallet
   if (
     loading ||
     !walletType ||
@@ -65,7 +64,6 @@ export default function WalletPage() {
     );
   }
 
-  // ✅ Pagina My Wallet visibile solo se il wallet è valido
   return (
     <div className="flex bg-black min-h-screen text-white">
       <Sidebar />
