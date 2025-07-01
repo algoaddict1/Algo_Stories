@@ -10,6 +10,9 @@ export default function ChooseWallet({ onWalletChosen }) {
   const { setWalletType, setWalletAddress } = useAASWallet();
 
   const handleAnonymousWallet = () => {
+     console.log("⚡ Anonymous button clicked");
+  alert("Anonymous Wallet clicked");
+    
     const account = algosdk.generateAccount();
     const type = "anonymous";
     const address = account.addr;
