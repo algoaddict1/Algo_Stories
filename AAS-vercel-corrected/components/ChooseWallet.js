@@ -1,125 +1,66 @@
 "use client";
-import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-import { useAASWallet } from "../context/WalletContext";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import algosdk from "algosdk";
+import { PeraWalletConnect } from "@perawallet/connect";
+import { useAASWallet } from "../context/WalletContext";
 
-// Import dinamico
-const Sidebar = dynamic(() => import("../components/Sidebar"), { ssr: false });
-const ChooseWallet = dynamic(() => import("../components/ChooseWallet"), { ssr: false });
+export default function ChooseWallet({ onWalletChosen }) {
+  const peraWallet = new PeraWalletConnect();
+  const { setWalletType, setWalletAddress } = useAASWallet();
 
-export default function WalletPage() {
-  const { walletType, walletAddress, setWalletType, setWalletAddress } = useAASWallet();
-  const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const handleAnonymousWallet = () => {
+    const account = algosdk.generateAccount();
+    const type = "anonymous";
+    const address = account.addr;
+    const mnemonic = algosdk.secretKeyToMnemonic(account.sk);
+    const walletData = { type, address, mnemonic };
+    localStorage.setItem("wallet", JSON.stringify(walletData));
+    setWalletType(type);
+    setWalletAddress(address);
+    if (onWalletChosen) onWalletChosen(type, address);
+  };
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setLoading(false);
-    }, 800);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  const handleClaimAAS = async () => {
-    if (!walletAddress || typeof walletAddress !== "string") {
-      alert("Connect your wallet before claiming.");
-      return;
-    }
-
+  const handlePersonalWallet = async () => {
     try {
-      setLoading(true);
-      const response = await fetch("https://your-backend-url.com/claim", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ wallet: walletAddress }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setHasClaimedAAS(true);
-        alert("🎉 AAS tokens successfully claimed!");
-      } else {
-        alert(data.message || "You already claimed your tokens.");
-      }
-    } catch {
-      alert("Something went wrong while claiming tokens.");
-    } finally {
-      setLoading(false);
+      const accounts = await peraWallet.connect();
+      const type = "personal";
+      const address = accounts[0];
+      const walletData = { type, address };
+      localStorage.setItem("wallet", JSON.stringify(walletData));
+      setWalletType(type);
+      setWalletAddress(address);
+      if (onWalletChosen) onWalletChosen(type, address);
+    } catch (e) {
+      console.error("Wallet connection failed", e);
     }
   };
 
-  if (
-    loading ||
-    !walletType ||
-    !walletAddress ||
-    typeof walletType !== "string" ||
-    typeof walletAddress !== "string"
-  ) {
-    return (
-      <div className="flex bg-black min-h-screen text-white">
-        <Sidebar />
-        <main className="flex-1 p-6 flex items-center justify-center">
-          <ChooseWallet
-            onWalletChosen={(type, address) => {
-              setWalletType(type);
-              setWalletAddress(address);
-              localStorage.setItem("wallet", JSON.stringify({ type, address }));
-            }}
-          />
-        </main>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex bg-black min-h-screen text-white">
-      <Sidebar />
-      <main className="flex-1 p-6 md:p-12 flex items-center justify-center">
-        <div className="max-w-xl w-full bg-zinc-900 p-6 rounded-2xl border border-cyan-600 shadow-md">
-          <motion.h1
-            className="text-3xl text-center text-cyan-400 mb-8"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            👛 My Wallet
-          </motion.h1>
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center px-4 space-y-8">
+      <h1 className="text-3xl md:text-5xl font-bold text-center">🛡️ Choose Your Wallet</h1>
+      <p className="text-center text-lg max-w-xl">
+        We respect your privacy. Choose how you want to post your story:
+      </p>
+      <div className="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          onClick={handlePersonalWallet}
+          className="bg-gray-900 p-6 rounded-2xl border border-blue-500 cursor-pointer hover:shadow-lg transition"
+        >
+          <h2 className="text-xl font-semibold mb-2">🔓 Connect Your Wallet</h2>
+          <p>Use your existing Algorand wallet (e.g., Pera Wallet).</p>
+        </motion.div>
 
-          <p className="text-lg mb-4">
-            <strong className="text-blue-400">Wallet Address:</strong>{" "}
-            {walletAddress}
-          </p>
-          <p className="text-lg mb-6">
-            <strong className="text-blue-400">Wallet Type:</strong>{" "}
-            {walletType}
-          </p>
-
-          <div className="mb-6">
-            {hasClaimedAAS ? (
-              <p className="text-green-400 font-semibold">
-                ✅ You have already claimed your AAS tokens.
-              </p>
-            ) : (
-              <button
-                onClick={handleClaimAAS}
-                disabled={loading}
-                className="bg-purple-600 hover:bg-purple-800 text-white px-4 py-2 rounded-xl shadow-md disabled:opacity-50"
-              >
-                {loading ? "⏳ Claiming..." : "🎁 Claim Your Free AAS Tokens"}
-              </button>
-            )}
-          </div>
-
-          <div className="mt-8">
-            <h2 className="text-xl text-purple-400 mb-2">📜 Your Published Stories</h2>
-            <p className="text-sm text-gray-400 mb-2">* Dynamic list coming soon.</p>
-            <ul className="text-gray-300 list-disc ml-6 space-y-1">
-              <li>"The Night of the Algorithm" — 2.5 ALGO in tips</li>
-              <li>"Decentralized Dreams" — 0.0 ALGO</li>
-              <li>"AAS Anonymous" — 1.75 ALGO</li>
-            </ul>
-          </div>
-        </div>
-      </main>
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          onClick={handleAnonymousWallet}
+          className="bg-gray-900 p-6 rounded-2xl border border-green-500 cursor-pointer hover:shadow-lg transition"
+        >
+          <h2 className="text-xl font-semibold mb-2">🕶️ Use Anonymous Wallet</h2>
+          <p>We will generate a temporary wallet with no link to your identity.</p>
+        </motion.div>
+      </div>
     </div>
   );
 }
