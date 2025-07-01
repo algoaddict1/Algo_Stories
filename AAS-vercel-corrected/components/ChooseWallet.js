@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
@@ -21,7 +20,7 @@ export default function ChooseWallet({ onWalletChosen }) {
     setWalletType(type);
     setWalletAddress(address);
     if (onWalletChosen) onWalletChosen(type, address);
-    router.push("/wallet");
+    router.replace("/wallet"); // 🔁 fix per la pagina corrente
   };
 
   const handlePersonalWallet = async () => {
@@ -34,7 +33,7 @@ export default function ChooseWallet({ onWalletChosen }) {
       setWalletType(type);
       setWalletAddress(address);
       if (onWalletChosen) onWalletChosen(type, address);
-      router.push("/wallet");
+      router.replace("/wallet");
     } catch (e) {
       console.error("Wallet connection failed", e);
     }
