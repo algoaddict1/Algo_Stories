@@ -1,18 +1,17 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { useAASWallet } from "../context/WalletContext";
 
 export default function ChooseWallet({ onWalletChosen }) {
+  const router = useRouter();
   const peraWallet = new PeraWalletConnect();
   const { setWalletType, setWalletAddress } = useAASWallet();
 
   const handleAnonymousWallet = () => {
-     console.log("⚡ Anonymous button clicked");
-  alert("Anonymous Wallet clicked");
-    
     const account = algosdk.generateAccount();
     const type = "anonymous";
     const address = account.addr;
@@ -22,6 +21,7 @@ export default function ChooseWallet({ onWalletChosen }) {
     setWalletType(type);
     setWalletAddress(address);
     if (onWalletChosen) onWalletChosen(type, address);
+    router.push("/wallet");
   };
 
   const handlePersonalWallet = async () => {
@@ -34,6 +34,7 @@ export default function ChooseWallet({ onWalletChosen }) {
       setWalletType(type);
       setWalletAddress(address);
       if (onWalletChosen) onWalletChosen(type, address);
+      router.push("/wallet");
     } catch (e) {
       console.error("Wallet connection failed", e);
     }
