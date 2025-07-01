@@ -6,27 +6,19 @@ import { PeraWalletConnect } from "@perawallet/connect";
 import { useAASWallet } from "../context/WalletContext";
 
 export default function ChooseWallet({ onWalletChosen }) {
-  const [selected, setSelected] = useState(null);
   const peraWallet = new PeraWalletConnect();
   const { setWalletType, setWalletAddress } = useAASWallet();
 
   const handleAnonymousWallet = () => {
-    try {
-      const account = algosdk.generateAccount();
-      const type = "anonymous";
-      const address = account.addr;
-      const mnemonic = algosdk.secretKeyToMnemonic(account.sk);
-
-      const walletData = { type, address, mnemonic };
-      console.log("✅ Generated Anonymous Wallet:", walletData);
-
-      localStorage.setItem("wallet", JSON.stringify(walletData));
-      setWalletType(type);
-      setWalletAddress(address);
-      if (onWalletChosen) onWalletChosen(type, address);
-    } catch (err) {
-      console.error("❌ Failed to generate anonymous wallet:", err);
-    }
+    const account = algosdk.generateAccount();
+    const type = "anonymous";
+    const address = account.addr;
+    const mnemonic = algosdk.secretKeyToMnemonic(account.sk);
+    const walletData = { type, address, mnemonic };
+    localStorage.setItem("wallet", JSON.stringify(walletData));
+    setWalletType(type);
+    setWalletAddress(address);
+    if (onWalletChosen) onWalletChosen(type, address);
   };
 
   const handlePersonalWallet = async () => {
@@ -34,16 +26,13 @@ export default function ChooseWallet({ onWalletChosen }) {
       const accounts = await peraWallet.connect();
       const type = "personal";
       const address = accounts[0];
-
       const walletData = { type, address };
-      console.log("✅ Connected Personal Wallet:", walletData);
-
       localStorage.setItem("wallet", JSON.stringify(walletData));
       setWalletType(type);
       setWalletAddress(address);
       if (onWalletChosen) onWalletChosen(type, address);
     } catch (e) {
-      console.error("❌ Wallet connection failed:", e);
+      console.error("Wallet connection failed", e);
     }
   };
 
