@@ -9,7 +9,7 @@ const Sidebar = dynamic(() => import("../components/Sidebar"), { ssr: false });
 const ChooseWallet = dynamic(() => import("../components/ChooseWallet"), { ssr: false });
 
 export default function WalletPage() {
-  const { walletType, walletAddress } = useAASWallet() || {};
+  const { walletType, walletAddress, setWalletType, setWalletAddress } = useAASWallet();
   const [hasClaimedAAS, setHasClaimedAAS] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +58,13 @@ export default function WalletPage() {
       <div className="flex bg-black min-h-screen text-white">
         <Sidebar />
         <main className="flex-1 p-6 flex items-center justify-center">
-          <ChooseWallet />
+          <ChooseWallet
+            onWalletChosen={(type, address) => {
+              setWalletType(type);
+              setWalletAddress(address);
+              localStorage.setItem("wallet", JSON.stringify({ type, address }));
+            }}
+          />
         </main>
       </div>
     );
@@ -80,11 +86,11 @@ export default function WalletPage() {
 
           <p className="text-lg mb-4">
             <strong className="text-blue-400">Wallet Address:</strong>{" "}
-            {typeof walletAddress === "string" ? walletAddress : "Invalid"}
+            {walletAddress}
           </p>
           <p className="text-lg mb-6">
             <strong className="text-blue-400">Wallet Type:</strong>{" "}
-            {typeof walletType === "string" ? walletType : "Invalid"}
+            {walletType}
           </p>
 
           <div className="mb-6">
