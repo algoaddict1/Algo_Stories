@@ -11,7 +11,7 @@ export default function StoryEditor() {
     setLoading(true);
 
     try {
-      const response = await fetch("https://aas-backend-jre2.onrender.com/stories", {
+      const response = await fetch("https://aas-backend-mpoy.onrender.com/stories", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
