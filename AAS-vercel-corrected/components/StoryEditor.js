@@ -1,18 +1,8 @@
 import { useState } from "react";
-import { create } from "ipfs-http-client";
-import { Buffer } from "buffer";
-import algosdk from "algosdk";
 import { useAASWallet } from "../context/WalletContext";
-
-// IPFS client
-const ipfs = create({ url: "https://ipfs.infura.io:5001/api/v0" });
-
-// Algorand testnet client
-const algod = new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', '');
 
 export default function StoryEditor() {
   const [story, setStory] = useState("");
-  const [ipfsHash, setIpfsHash] = useState(null);
   const [loading, setLoading] = useState(false);
   const { walletType, walletAddress } = useAASWallet();
 
@@ -21,47 +11,31 @@ export default function StoryEditor() {
     setLoading(true);
 
     try {
-      // Upload to IPFS
-      const file = Buffer.from(story);
-      const result = await ipfs.add(file);
-      const hash = result.path;
-      setIpfsHash(hash);
-
-      // Skip blockchain tx if not anonymous wallet
-      if (walletType !== "anonymous") {
-        setLoading(false);
-        return;
-      }
-
-      const local = localStorage.getItem("wallet");
-      const parsed = JSON.parse(local);
-
-      if (!parsed || !parsed.address || !parsed.mnemonic) {
-        alert("Missing anonymous wallet data.");
-        setLoading(false);
-        return;
-      }
-
-      const privateKey = algosdk.mnemonicToSecretKey(parsed.mnemonic).sk;
-      const params = await algod.getTransactionParams().do();
-      const note = new TextEncoder().encode(`ipfs://${hash}`);
-
-      const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: parsed.address,
-        to: parsed.address,
-        amount: 0,
-        note,
-        suggestedParams: params,
+      const response = await fetch("https://aas-backend-jre2.onrender.com/stories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          wallet: walletAddress,
+          content: story,
+        }),
       });
 
-      const signedTxn = txn.signTxn(privateKey);
-      const { txId } = await algod.sendRawTransaction(signedTxn).do();
-      await algod.statusAfterBlock(params.lastRound + 1).do();
+      const result = await response.json();
 
-      console.log("✅ Transaction sent:", txId);
+      if (!response.ok) {
+        throw new Error(result.error || "Unknown error");
+      }
+
+      alert(`✅ Story minted as NFT!\nNFT ID: ${result.nft_id}`);
+      // Optional: open in explorer
+      // window.open(`https://testnet.algoexplorer.io/asset/${result.nft_id}`, "_blank");
+
+      setStory(""); // reset
     } catch (err) {
-      console.error("❌ Upload error:", err);
-      alert("Failed to upload your story.");
+      console.error("❌ Error submitting story:", err);
+      alert("Failed to submit your story.");
     }
 
     setLoading(false);
@@ -81,22 +55,8 @@ export default function StoryEditor() {
         disabled={loading}
         className="mt-4 px-4 py-2 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-xl font-semibold hover:scale-105 transition"
       >
-        {loading ? "Uploading to IPFS..." : "Submit Story"}
+        {loading ? "Publishing..." : "Submit Story"}
       </button>
-
-      {ipfsHash && (
-        <div className="mt-4 text-green-400 break-all">
-          ✅ Story uploaded! IPFS Hash:&nbsp;
-          <a
-            href={`https://ipfs.io/ipfs/${ipfsHash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            {ipfsHash}
-          </a>
-        </div>
-      )}
     </div>
   );
 }
