@@ -1,41 +1,37 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { useAASWallet } from "../context/WalletContext";
 import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
-import { useAASWallet } from "../context/WalletContext";
+import { motion } from "framer-motion";
 
-export default function ChooseWallet({ onWalletChosen }) {
-  const router = useRouter();
-  const peraWallet = new PeraWalletConnect();
+export default function ChooseWallet() {
   const { setWalletType, setWalletAddress } = useAASWallet();
+  const router = useRouter();
 
-  const handleAnonymousWallet = () => {
+  const handleAnonymous = () => {
     const account = algosdk.generateAccount();
     const type = "anonymous";
     const address = account.addr;
     const mnemonic = algosdk.secretKeyToMnemonic(account.sk);
-    const walletData = { type, address, mnemonic };
-    localStorage.setItem("wallet", JSON.stringify(walletData));
+    localStorage.setItem("wallet", JSON.stringify({ type, address, mnemonic }));
     setWalletType(type);
     setWalletAddress(address);
-    if (onWalletChosen) onWalletChosen(type, address);
-    router.replace("/wallet"); // 🔁 fix per la pagina corrente
+    router.replace("/wallet");
   };
 
-  const handlePersonalWallet = async () => {
+  const handlePersonal = async () => {
+    const pera = new PeraWalletConnect();
     try {
-      const accounts = await peraWallet.connect();
-      const type = "personal";
+      const accounts = await pera.connect();
       const address = accounts[0];
-      const walletData = { type, address };
-      localStorage.setItem("wallet", JSON.stringify(walletData));
+      const type = "personal";
+      localStorage.setItem("wallet", JSON.stringify({ type, address }));
       setWalletType(type);
       setWalletAddress(address);
-      if (onWalletChosen) onWalletChosen(type, address);
       router.replace("/wallet");
     } catch (e) {
-      console.error("Wallet connection failed", e);
+      console.error("Pera Wallet connection failed", e);
     }
   };
 
@@ -48,20 +44,20 @@ export default function ChooseWallet({ onWalletChosen }) {
       <div className="grid md:grid-cols-2 gap-6 w-full max-w-3xl">
         <motion.div
           whileHover={{ scale: 1.05 }}
-          onClick={handlePersonalWallet}
+          onClick={handlePersonal}
           className="bg-gray-900 p-6 rounded-2xl border border-blue-500 cursor-pointer hover:shadow-lg transition"
         >
-          <h2 className="text-xl font-semibold mb-2">🔓 Connect Your Wallet</h2>
-          <p>Use your existing Algorand wallet (e.g., Pera Wallet).</p>
+          <h2 className="text-xl font-semibold mb-2">🔓 Connect Wallet</h2>
+          <p>Use your Algorand wallet (Pera Wallet, etc).</p>
         </motion.div>
 
         <motion.div
           whileHover={{ scale: 1.05 }}
-          onClick={handleAnonymousWallet}
+          onClick={handleAnonymous}
           className="bg-gray-900 p-6 rounded-2xl border border-green-500 cursor-pointer hover:shadow-lg transition"
         >
-          <h2 className="text-xl font-semibold mb-2">🕶️ Use Anonymous Wallet</h2>
-          <p>We will generate a temporary wallet with no link to your identity.</p>
+          <h2 className="text-xl font-semibold mb-2">🕶️ Anonymous Wallet</h2>
+          <p>We'll generate a temporary wallet without identity links.</p>
         </motion.div>
       </div>
     </div>
