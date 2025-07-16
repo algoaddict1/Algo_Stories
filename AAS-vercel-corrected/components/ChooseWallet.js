@@ -1,51 +1,24 @@
 "use client";
-import { useState } from "react";
 import { motion } from "framer-motion";
-import algosdk from "algosdk";
 import { PeraWalletConnect } from "@perawallet/connect";
 import { useAASWallet } from "../context/WalletContext";
 
 export default function ChooseWallet({ onWalletChosen }) {
   const peraWallet = new PeraWalletConnect();
   const { setWalletType, setWalletAddress } = useAASWallet();
-  const [loading, setLoading] = useState(false);
-
-  const handleAnonymousWallet = () => {
-    const account = algosdk.generateAccount();
-    const type = "anonymous";
-    const address = account.addr;
-    const mnemonic = algosdk.secretKeyToMnemonic(account.sk);
-    const walletData = { type, address, mnemonic };
-
-    // Salva su localStorage e context
-    localStorage.setItem("wallet", JSON.stringify(walletData));
-    setWalletType(type);
-    setWalletAddress(address);
-    if (onWalletChosen) onWalletChosen(type, address);
-  };
 
   const handlePersonalWallet = async () => {
     try {
-      setLoading(true);
       const accounts = await peraWallet.connect();
-
-      let address = accounts[0];
-      if (typeof address === "object" && address.publicKey) {
-        address = address.publicKey; // Usa solo la stringa
-      }
-
       const type = "personal";
+      const address = accounts[0];
       const walletData = { type, address };
-
-      // Salva su localStorage e context
       localStorage.setItem("wallet", JSON.stringify(walletData));
       setWalletType(type);
       setWalletAddress(address);
       if (onWalletChosen) onWalletChosen(type, address);
     } catch (e) {
       console.error("Wallet connection failed", e);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -66,12 +39,10 @@ export default function ChooseWallet({ onWalletChosen }) {
         </motion.div>
 
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          onClick={handleAnonymousWallet}
-          className="bg-gray-900 p-6 rounded-2xl border border-green-500 cursor-pointer hover:shadow-lg transition"
+          className="bg-gray-800 p-6 rounded-2xl border border-gray-500 cursor-not-allowed opacity-50"
         >
-          <h2 className="text-xl font-semibold mb-2">🕶️ Use Anonymous Wallet</h2>
-          <p>We will generate a temporary wallet with no link to your identity.</p>
+          <h2 className="text-xl font-semibold mb-2">🕶️ Anonymous Wallet</h2>
+          <p>Coming Soon...</p>
         </motion.div>
       </div>
     </div>
